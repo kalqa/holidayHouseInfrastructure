@@ -32,14 +32,17 @@ public class HolidayHouseServiceImpl implements HolidayHouseService {
 
     @Override
     public ReservationResponse makeReservation(ReservationDTO reservationDto) {
-        Collection<RoomDTO> allRooms = holidayHouseClient.getAllRooms().values();
-        List<Room> availableRooms = getAvailableRooms(reservationDto.getFromDate(), reservationDto.getToDate(), allRooms);
-//        List<Integer> availableRoomsForPeriod = getAvailableRoomsForPeriod(reservationDto.getFromDate(), reservationDto.getToDate());
-        boolean present = availableRooms.stream().anyMatch(room -> room.getRoomNumber().equals(reservationDto.getRoomNumber()));
-        if (present) {
-            return holidayHouseClient.makeReservation(reservationDto);
+        boolean isThereAtLeastOneCollision = holidayHouseClient.getAllReservations()
+                .stream()
+                .map(reservationDTO -> reservationMapper.mapToReservation(reservationDTO))
+                .filter(reservation -> reservation.getRoomNumber().equals(reservationDto.getRoomNumber()))
+                .anyMatch(reservation -> !isReservationNotAvailable(reservation, reservationDto.getFromDate(), reservationDto.getToDate()));
+
+        if (isThereAtLeastOneCollision) {
+            return ReservationResponse.builder().withMessage("please choose another period").build();
         }
-        return ReservationResponse.builder().withMessage("please choose another period").build();
+
+        return holidayHouseClient.makeReservation(reservationDto);
     }
 
     @Override
@@ -80,23 +83,6 @@ public class HolidayHouseServiceImpl implements HolidayHouseService {
         Date fromDate = reservation.getFromDate();
         Date toDate = reservation.getToDate();
         return !(isDataInRange(clientFromDate, fromDate, toDate) || isDataInRange(clientToDate, fromDate, toDate));
-
-//        SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy");
-//        clientToDate = null;
-//        clientFromDate = null;
-//        try {
-//            clientFromDate = sdf.parse("09-08-2019");
-//            clientToDate = sdf.parse("10-08-2019");
-//        } catch (ParseException e) {
-//            e.printStackTrace();
-//        }
-//
-//        if (clientToDate != null) {
-//            boolean b = clientFromDate.after(fromDate) && clientFromDate.before(toDate);
-//            boolean b1 = clientToDate.after(fromDate) && clientToDate.before(toDate);
-//            return b || b1;
-//        }
-//        return false;
     }
 
     private boolean isDataInRange(Date clientFromDate, Date fromDate, Date toDate) {
