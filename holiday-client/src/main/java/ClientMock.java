@@ -3,14 +3,14 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Date;
 
 import javax.ws.rs.core.MediaType;
 
-import org.codehaus.jettison.json.JSONException;
-import org.codehaus.jettison.json.JSONObject;
-
+import com.holiday.house.api.dto.ReservationDTO;
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientResponse;
+import org.codehaus.jettison.json.JSONObject;
 
 public class ClientMock {
 
@@ -38,6 +38,8 @@ public class ClientMock {
                     i = getOption();
                     break;
                 case 2:
+                    handleMakingReservation();
+                    i = getOption();
                     break;
                 case 3:
                     break;
@@ -92,18 +94,19 @@ public class ClientMock {
             e.printStackTrace();
         }
 
-        ClientResponse response = restClient
-                .resource("http://127.0.0.1:8080/holiday-house-service/room")
-                .queryParam("arrivalDate", arrivalDate)
-                .queryParam("leaveDate", leaveDate)
-                .accept(MediaType.APPLICATION_JSON)
-                .get(ClientResponse.class);
-
-        JSONObject roomResponse = response.getEntity(JSONObject.class);
         try {
+            ClientResponse response = restClient
+                    .resource("http://127.0.0.1:8080/holiday-house-service/room")
+                    .queryParam("arrivalDate", arrivalDate)
+                    .queryParam("leaveDate", leaveDate)
+                    .accept(MediaType.APPLICATION_JSON)
+                    .get(ClientResponse.class);
+
+            JSONObject roomResponse = response.getEntity(JSONObject.class);
+
             System.out.println(roomResponse.getJSONArray("availableRooms"));
             //maybe sleep
-        } catch (JSONException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
@@ -119,5 +122,47 @@ public class ClientMock {
             return false;
         }
         return true;
+    }
+
+    private static void handleMakingReservation() {
+        System.out.println("Please give me arrival date (dd-MM-yyyy)");
+        System.out.println("Please give me date when you will leave room (dd-MM-yyyy)");
+        System.out.println("Please give me room number");
+
+//        String arrivalDate = null;
+//        String leaveDate = null;
+        String roomNumber = null;
+        try {
+//            arrivalDate = in.readLine();
+//            leaveDate = in.readLine();
+            roomNumber = in.readLine();
+            String arrivalDate = "10-08-2019";
+            String leaveDate = "12-08-2019";
+
+            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd-MM-yyyy");
+            Date arrivalDateParsed = simpleDateFormat.parse(arrivalDate);
+            Date leaveDateParsed = simpleDateFormat.parse(leaveDate);
+
+            ReservationDTO reservationDTO = ReservationDTO.builder()
+                    .withRoomNumber(Integer.parseInt(roomNumber))
+                    .withFromDate(arrivalDateParsed)
+                    .withToDate(leaveDateParsed)
+                    .withUserName(nickName)
+                    .build();
+
+            ClientResponse response = restClient
+                    .resource("http://127.0.0.1:8080/holiday-house-service/reservation")
+                    .accept("application/json")
+                    .type("application/json")
+                    .post(ClientResponse.class, reservationDTO);
+
+            System.out.println(response);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        if (roomNumber == null) {
+            return;
+        }
     }
 }

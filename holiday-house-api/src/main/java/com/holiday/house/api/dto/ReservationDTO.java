@@ -2,18 +2,24 @@ package com.holiday.house.api.dto;
 
 import java.util.Date;
 
+import javax.xml.bind.annotation.XmlRootElement;
+
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
+@XmlRootElement
 public class ReservationDTO {
 
     private Integer roomNumber;
+    private String userName;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy")
     private Date fromDate;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy")
     private Date toDate;
-    private String userName;
+
+    public ReservationDTO() {
+    }
 
     public static ReservationDTOBuilder builder() {
         return new ReservationDTOBuilder();
@@ -32,6 +38,7 @@ public class ReservationDTO {
         return fromDate;
     }
 
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy")
     public void setFromDate(Date fromDate) {
         this.fromDate = fromDate;
     }
@@ -41,6 +48,7 @@ public class ReservationDTO {
         return toDate;
     }
 
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy")
     public void setToDate(Date toDate) {
         this.toDate = toDate;
     }
@@ -51,6 +59,16 @@ public class ReservationDTO {
 
     public void setUserName(String userName) {
         this.userName = userName;
+    }
+
+    @Override
+    public String toString() {
+        return "ReservationDTO{" +
+                "roomNumber=" + roomNumber +
+                ", userName='" + userName + '\'' +
+                ", fromDate=" + fromDate +
+                ", toDate=" + toDate +
+                '}';
     }
 
     public static final class ReservationDTOBuilder {
@@ -85,10 +103,10 @@ public class ReservationDTO {
 
         public ReservationDTO build() {
             ReservationDTO reservationDTO = new ReservationDTO();
-            reservationDTO.fromDate = this.fromDate;
-            reservationDTO.userName = this.userName;
-            reservationDTO.toDate = this.toDate;
-            reservationDTO.roomNumber = this.roomNumber;
+            reservationDTO.setFromDate(this.fromDate);
+            reservationDTO.setUserName(this.userName);
+            reservationDTO.setToDate(this.toDate);
+            reservationDTO.setRoomNumber(this.roomNumber);
             return reservationDTO;
         }
     }
