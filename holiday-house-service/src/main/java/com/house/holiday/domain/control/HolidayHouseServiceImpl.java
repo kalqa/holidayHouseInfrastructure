@@ -66,7 +66,8 @@ public class HolidayHouseServiceImpl implements HolidayHouseService {
 
     private List<Room> getAvailableRooms(Date fromDate, Date toDate, Collection<RoomDTO> allRooms) {
         return allRooms.stream()
-                .filter(room -> getAvailableRoomsForPeriod(fromDate, toDate).contains(room.getRoomNumber()))
+                .filter(room -> getAvailableRoomsForPeriod(fromDate, toDate)
+                        .contains(room.getRoomNumber()))
                 .map(roomDTO -> roomMapper.mapToRoom(roomDTO))
                 .collect(Collectors.toList());
     }

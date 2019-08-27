@@ -10,6 +10,6 @@ import com.house.holiday.domain.entity.RoomResponse;
 public interface HolidayHouseService {
 
     ReservationResponse makeReservation(ReservationDTO reservationDTO);
-    RoomResponse getAvailableRooms(Date date, Date toDate);
+    RoomResponse getAvailableRooms(Date fromDate, Date toDate);
     CancelReservationResponse cancelReservationById(String id);
 }

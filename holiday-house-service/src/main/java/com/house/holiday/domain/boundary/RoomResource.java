@@ -8,13 +8,15 @@ import javax.inject.Inject;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
 
 import com.house.holiday.domain.control.HolidayHouseServiceImpl;
 import com.house.holiday.domain.entity.RoomResponse;
 
-@Produces("application/json")
+@Produces(MediaType.APPLICATION_JSON)
 @Path(RoomResource.RESOURCE_PATH)
 public class RoomResource {
 
@@ -24,26 +26,35 @@ public class RoomResource {
     HolidayHouseServiceImpl holidayHouseService;
 
     @GET
-    public Response getAvailableRooms() {
-        SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy");
-        Date clientFromDate = null;
-        Date clientToDate = null;
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getAvailableRooms(@QueryParam("arrivalDate") String arrivalDate,
+                                      @QueryParam("leaveDate") String leaveDate) {
+
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd-MM-yyyy");
+        Date clientFromDate;
+        Date clientToDate;
         try {
-            clientFromDate = sdf.parse("09-08-2019");
-            clientToDate = sdf.parse("10-08-2019");
+            clientFromDate = simpleDateFormat.parse(arrivalDate);
+            clientToDate = simpleDateFormat.parse(leaveDate);
         } catch (ParseException e) {
             e.printStackTrace();
+            return buildFailResponse("Incorrect date format. Should be (dd-MM-yyyy)");
         }
+
         RoomResponse roomResponse = holidayHouseService.getAvailableRooms(clientFromDate, clientToDate);
-        return responseMapper(roomResponse);
+        return buildResponse(roomResponse);
     }
 
-    private Response responseMapper(RoomResponse roomResponse) {
-//        return Response.status(roomResponse.getStatus())
-//                .entity(roomResponse.getEntity())
-//                .type(roomResponse.getType())
-//                .build();
+    private Response buildFailResponse(String message) {
+        return Response.status(Status.BAD_REQUEST)
+                .entity(RoomResponse.builder()
+                        .withMessage(message)
+                        .build())
+                .type(MediaType.APPLICATION_JSON).build();
+    }
 
-        return Response.ok(roomResponse.getAvailableRooms()).type(MediaType.APPLICATION_JSON).build();
+    private Response buildResponse(RoomResponse roomResponse) {
+        return Response.ok(roomResponse)
+                .type(MediaType.APPLICATION_JSON).build();
     }
 }
