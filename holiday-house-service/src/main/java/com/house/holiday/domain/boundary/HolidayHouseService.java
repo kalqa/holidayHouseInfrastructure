@@ -1,16 +1,15 @@
 package com.house.holiday.domain.boundary;
 
 import java.time.LocalDate;
-import java.util.Date;
+import java.util.Collection;
 
 import com.holiday.house.api.dto.ReservationDTO;
-import com.house.holiday.domain.entity.CancelReservationResponse;
-import com.house.holiday.domain.entity.ReservationResponse;
 import com.house.holiday.domain.entity.RoomResponse;
 
 public interface HolidayHouseService {
 
-    ReservationResponse makeReservation(ReservationDTO reservationDTO);
+    ReservationDTO makeReservation(ReservationDTO reservationDTO);
     RoomResponse getAvailableRooms(LocalDate fromDate, LocalDate toDate);
-    CancelReservationResponse cancelReservationById(String id);
+    ReservationDTO cancelReservationById(String id);
+    Collection<ReservationDTO> getAllReservationsByNickName(String nickName);
 }

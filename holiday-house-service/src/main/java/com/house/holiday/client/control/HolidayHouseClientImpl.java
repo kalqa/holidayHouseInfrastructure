@@ -1,6 +1,7 @@
 package com.house.holiday.client.control;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Map;
 
 import javax.ws.rs.ProcessingException;
@@ -12,11 +13,9 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import com.holiday.house.api.dto.ReservationDTO;
-import com.holiday.house.api.dto.ReservationResponseDTO;
+import com.holiday.house.api.dto.ReservationDTO.ReservationDTOBuilder;
 import com.holiday.house.api.dto.RoomDTO;
 import com.house.holiday.client.boundary.HolidayHouseClient;
-import com.house.holiday.domain.entity.ReservationResponse;
-import com.house.holiday.domain.entity.ReservationResponse.ReservationResponseBuilder;
 
 public class HolidayHouseClientImpl implements HolidayHouseClient {
 
@@ -32,9 +31,9 @@ public class HolidayHouseClientImpl implements HolidayHouseClient {
     }
 
     @Override
-    public ReservationResponse makeReservation(ReservationDTO reservationDto) {
+    public ReservationDTO makeReservation(ReservationDTO reservationDto) {
         Response response = null;
-        ReservationResponseBuilder reservationResponse = ReservationResponse.builder();
+        ReservationDTOBuilder reservationResponse = ReservationDTO.builder();
 
         try {
             response = restClient
@@ -42,18 +41,18 @@ public class HolidayHouseClientImpl implements HolidayHouseClient {
                     .request()
                     .post(Entity.entity(reservationDto, MediaType.APPLICATION_JSON));
 
-            if (response.getStatus() == 200) {
-                ReservationResponseDTO reservationResponseDto = response.readEntity(new GenericType<ReservationResponseDTO>() {});
-                reservationResponse.withReservationId(reservationResponseDto.getId());
+            if (response.getStatus() == Response.Status.OK.getStatusCode()) {
+                ReservationDTO reservationResponseDto = response.readEntity(new GenericType<ReservationDTO>() {});
+                reservationResponse.withId(reservationResponseDto.getId());
             } else {
                 //logger
-                reservationResponse.withMessage("failed");
+                reservationResponse.withId("failed");
             }
         } catch (ProcessingException e) {
             //logger
             e.printStackTrace();
             System.out.println("content of the message cannot be mapped to an entity of the requested type" + e.getMessage());
-            reservationResponse.withMessage("Content of the message cannot be mapped to an entity of the requested type |" + e.getMessage());
+            reservationResponse.withId("Content of the message cannot be mapped to an entity of the requested type |" + e.getMessage());
         } finally {
             if (response != null) {
                 response.close();
@@ -64,19 +63,75 @@ public class HolidayHouseClientImpl implements HolidayHouseClient {
     }
 
     @Override
-    public String cancelReservation(String reservationId) {
-        return null;
+    public ReservationDTO cancelReservationById(String reservationId) {
+        Response response = null;
+        ReservationDTOBuilder reservationResponse = ReservationDTO.builder();
+
+        try {
+            response = restClient
+                    .target("https://houseinfrastructurev1.firebaseio.com/reservations.json?")
+                    .request()
+                    .delete();
+
+            if (response.getStatus() == Response.Status.OK.getStatusCode()) {
+                return ReservationDTO.builder().withId(reservationId).build();
+            } else {
+                //logger
+                reservationResponse.withId("failed");
+            }
+        } catch (ProcessingException e) {
+            //logger
+            e.printStackTrace();
+            System.out.println("content of the message cannot be mapped to an entity of the requested type" + e.getMessage());
+            reservationResponse.withId("Content of the message cannot be mapped to an entity of the requested type |" + e.getMessage());
+        } finally {
+            if (response != null) {
+                response.close();
+            }
+        }
+
+        return reservationResponse.build();
     }
 
     @Override
     public Collection<ReservationDTO> getAllReservations() {
-        Collection<ReservationDTO> values = restClient
-//                .target("https://houseinfrastructurev1.firebaseio.com/reservations.json?orderBy=\"fromDate\"&startAt=\"" + startDate + "\"")
+        return restClient
                 .target("https://houseinfrastructurev1.firebaseio.com/reservations.json?")
                 .request()
                 .get()
                 .readEntity(new GenericType<Map<String, ReservationDTO>>() {})
                 .values();
-        return values;
+    }
+
+    @Override
+    public Collection<ReservationDTO> getAllReservationsByNickName(String nickName) {
+        Response response = null;
+        ReservationDTOBuilder reservationResponse = ReservationDTO.builder();
+
+        try {
+            response = restClient
+                    .target("https://houseinfrastructurev1.firebaseio.com/reservations.json?orderBy=\"userName\"&equalTo=\"" + nickName + "\"")
+                    .request()
+                    .get();
+
+            if (response.getStatus() == Response.Status.OK.getStatusCode()) {
+                return response.readEntity(new GenericType<Map<String, ReservationDTO>>() {})
+                        .values(); // TODO tutaj cos do zmiany
+            } else {
+                //logger
+                reservationResponse.withId("failed");
+            }
+        } catch (ProcessingException e) {
+            //logger
+            e.printStackTrace();
+            System.out.println("content of the message cannot be mapped to an entity of the requested type" + e.getMessage());
+            reservationResponse.withId("Content of the message cannot be mapped to an entity of the requested type |" + e.getMessage());
+        } finally {
+            if (response != null) {
+                response.close();
+            }
+        }
+
+        return Collections.singleton(reservationResponse.build());
     }
 }

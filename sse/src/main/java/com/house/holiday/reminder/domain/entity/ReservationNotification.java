@@ -5,7 +5,7 @@ public class ReservationNotification {
     private final String message;
     private final String userName;
 
-    public ReservationNotification(String message, String userName, Integer roomNumber) {
+    public ReservationNotification(String message, String userName) {
         this.message = message;
         this.userName = userName;
     }

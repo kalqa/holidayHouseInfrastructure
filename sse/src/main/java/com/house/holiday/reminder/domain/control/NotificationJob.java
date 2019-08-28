@@ -5,14 +5,13 @@ import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import com.holiday.house.api.dto.ReservationDTO;
+import com.house.holiday.reminder.client.boundary.ReservationClient;
+import com.house.holiday.reminder.domain.entity.ReservationNotification;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
-
-import com.holiday.house.api.dto.ReservationDTO;
-import com.house.holiday.reminder.client.boundary.ReservationClient;
-import com.house.holiday.reminder.domain.entity.ReservationNotification;
 
 @Service
 public class NotificationJob {
@@ -29,7 +28,7 @@ public class NotificationJob {
     }
 
     @Scheduled(fixedRate = 3600000)
-//    @Scheduled(fixedRate = 1000)
+//    @Scheduled(fixedRate = 10000)
     public void doSomething() {
         Collection<ReservationDTO> allReservationsFromFireBase = reservationClient.getAllReservations();
 
@@ -43,7 +42,7 @@ public class NotificationJob {
     }
 
     private ReservationNotification getReservationNotification(ReservationDTO reservationDTO) {
-        return new ReservationNotification(REMEMBER_ABOUT_YOUR_RESERVATION_TOMORROW, reservationDTO.getUserName(), reservationDTO.getRoomNumber());
+        return new ReservationNotification(REMEMBER_ABOUT_YOUR_RESERVATION_TOMORROW, reservationDTO.getUserName());
     }
 
     private boolean isOneDayBeforeReservation(LocalDate currentDay, ReservationDTO reservationDTO) {

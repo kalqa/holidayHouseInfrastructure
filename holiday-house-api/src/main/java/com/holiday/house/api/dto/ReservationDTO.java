@@ -6,15 +6,22 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @XmlRootElement
 public class ReservationDTO {
 
+    @JsonProperty("name")
+    private String id;
+
     private Integer roomNumber;
+
     private String userName;
+
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy")
     private LocalDate fromDate;
+
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy")
     private LocalDate toDate;
 
@@ -61,6 +68,14 @@ public class ReservationDTO {
         this.userName = userName;
     }
 
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
     @Override
     public String toString() {
         return "ReservationDTO{" +
@@ -73,6 +88,7 @@ public class ReservationDTO {
 
     public static final class ReservationDTOBuilder {
 
+        private String id;
         private Integer roomNumber;
         private LocalDate fromDate;
         private LocalDate toDate;
@@ -101,12 +117,18 @@ public class ReservationDTO {
             return this;
         }
 
+        public ReservationDTOBuilder withId(String id) {
+            this.id = id;
+            return this;
+        }
+
         public ReservationDTO build() {
             ReservationDTO reservationDTO = new ReservationDTO();
             reservationDTO.setFromDate(this.fromDate);
             reservationDTO.setUserName(this.userName);
             reservationDTO.setToDate(this.toDate);
             reservationDTO.setRoomNumber(this.roomNumber);
+            reservationDTO.setId(this.id);
             return reservationDTO;
         }
     }

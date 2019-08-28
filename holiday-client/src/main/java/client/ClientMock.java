@@ -3,25 +3,19 @@ package client;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.net.URI;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
-import java.util.concurrent.TimeUnit;
 
 import javax.ws.rs.core.MediaType;
 
-import org.codehaus.jettison.json.JSONObject;
-import org.slf4j.LoggerFactory;
-
-import com.holiday.house.api.dto.ReservationDTO;
-import com.launchdarkly.eventsource.EventHandler;
-import com.launchdarkly.eventsource.EventSource;
-import com.sun.jersey.api.client.Client;
-import com.sun.jersey.api.client.ClientResponse;
-
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
+import com.holiday.house.api.dto.ReservationDTO;
+import com.sun.jersey.api.client.Client;
+import com.sun.jersey.api.client.ClientResponse;
+import org.codehaus.jettison.json.JSONObject;
+import org.slf4j.LoggerFactory;
 
 public class ClientMock {
 
@@ -40,29 +34,9 @@ public class ClientMock {
             e.printStackTrace();
         }
 
-        Runnable myRunnable =
-                () -> {
-                    EventHandler eventHandler = new SimpleEventHandler();
-                    String url = String.format("http://localhost:8080/notification?nickName=" + nickName);
-                    EventSource.Builder builder = new EventSource.Builder(eventHandler, URI.create(url));
+        startNotificationListenerInNewThread();
 
-                    try (EventSource eventSource = builder.build()) {
-                        eventSource.setReconnectionTimeMs(3000);
-                        eventSource.start();
-
-                        TimeUnit.MINUTES.sleep(10);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                };
-
-        Thread t1 = new Thread(myRunnable);
-        t1.start();
-
-        // in new thread ->
-
-        int i = 100;
-
+        int i = 0;
         while (i != 4) {
             i = getOption();
             switch (i) {
@@ -75,12 +49,43 @@ public class ClientMock {
                     i = getOption();
                     break;
                 case 3:
+                    handleCancelingReservation(nickName);
+                    i = getOption();
                     break;
                 case 4:
                     return;
                 default:
             }
         }
+    }
+
+    private static void handleCancelingReservation(String nickName) {
+        // 1. get All nickname reservation
+        // 2. list the ids for to the UI
+        // 3. get number
+
+
+        try {
+            ClientResponse response = restClient
+                    .resource("http://127.0.0.1:8080/holiday-house-service/reservation")
+                    .queryParam("nickName", nickName)
+                    .accept(MediaType.APPLICATION_JSON)
+                    .get(ClientResponse.class);
+
+            JSONObject roomResponse = response.getEntity(JSONObject.class);
+
+            System.out.println(roomResponse.getJSONArray("availableRooms"));
+            //maybe sleep
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    private static void startNotificationListenerInNewThread() {
+        NotificationListener notificationListener = new NotificationListener(nickName);
+        Thread t1 = new Thread(notificationListener);
+        t1.start();
     }
 
     private static void disableLogsFromSseProtcol() {

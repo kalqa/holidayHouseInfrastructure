@@ -13,9 +13,7 @@ import com.house.holiday.client.control.HolidayHouseClientImpl;
 import com.house.holiday.domain.boundary.HolidayHouseService;
 import com.house.holiday.domain.boundary.ReservationMapper;
 import com.house.holiday.domain.boundary.RoomMapper;
-import com.house.holiday.domain.entity.CancelReservationResponse;
 import com.house.holiday.domain.entity.Reservation;
-import com.house.holiday.domain.entity.ReservationResponse;
 import com.house.holiday.domain.entity.Room;
 import com.house.holiday.domain.entity.RoomResponse;
 
@@ -31,7 +29,7 @@ public class HolidayHouseServiceImpl implements HolidayHouseService {
     ReservationMapper reservationMapper;
 
     @Override
-    public ReservationResponse makeReservation(ReservationDTO reservationDto) {
+    public ReservationDTO makeReservation(ReservationDTO reservationDto) {
         boolean isThereAtLeastOneCollision = holidayHouseClient.getAllReservations()
                 .stream()
                 .map(reservationDTO -> reservationMapper.mapToReservation(reservationDTO))
@@ -39,7 +37,8 @@ public class HolidayHouseServiceImpl implements HolidayHouseService {
                 .anyMatch(reservation -> !isReservationNotAvailable(reservation, reservationDto.getFromDate(), reservationDto.getToDate()));
 
         if (isThereAtLeastOneCollision) {
-            return ReservationResponse.builder().withMessage("please choose another period").build();
+            //logger
+            return ReservationDTO.builder().withId("please choose another period").build(); // TODO maybe change add message field in reservationDTO
         }
 
         return holidayHouseClient.makeReservation(reservationDto);
@@ -56,12 +55,13 @@ public class HolidayHouseServiceImpl implements HolidayHouseService {
     }
 
     @Override
-    public CancelReservationResponse cancelReservationById(String reservationId) {
-        String id = holidayHouseClient.cancelReservation(reservationId);
+    public ReservationDTO cancelReservationById(String reservationId) {
+        return holidayHouseClient.cancelReservationById(reservationId);
+    }
 
-        return CancelReservationResponse.builder()
-                .withId(id)
-                .build();
+    @Override
+    public Collection<ReservationDTO> getAllReservationsByNickName(String nickName) {
+        return holidayHouseClient.getAllReservationsByNickName(nickName);
     }
 
     private List<Room> getAvailableRooms(LocalDate fromDate, LocalDate toDate, Collection<RoomDTO> allRooms) {

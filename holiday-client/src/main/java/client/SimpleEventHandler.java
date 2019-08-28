@@ -1,5 +1,12 @@
 package client;
 
+import java.io.StringReader;
+
+import javax.json.Json;
+import javax.json.JsonObject;
+import javax.json.JsonReader;
+import javax.json.JsonValue;
+
 import com.launchdarkly.eventsource.EventHandler;
 import com.launchdarkly.eventsource.MessageEvent;
 
@@ -15,16 +22,11 @@ public class SimpleEventHandler implements EventHandler {
 
     @Override
     public void onMessage(String event, MessageEvent messageEvent) {
-        System.out.println("========= " + event);
-        String data = messageEvent.getData();
-        System.out.println("data======== " + data);
-//        if (event.equals("message")) {
-//            System.out.println("event NAME: " + event);
-//            System.out.println("ON MESSAGE:");
-//            System.out.println(messageEvent.getData());
-//        } else {
-//            System.out.println("event NAME: " + event);
-//        }
+        try (JsonReader jsonReader = Json.createReader(new StringReader(messageEvent.getData()))) {
+            JsonObject jsonObject = jsonReader.readObject();
+            JsonValue message = jsonObject.getValue("/message");
+            System.out.println(message);
+        }
     }
 
     @Override
@@ -33,6 +35,5 @@ public class SimpleEventHandler implements EventHandler {
 
     @Override
     public void onError(Throwable t) {
-//        System.out.println("onError: " + t);
     }
 }
