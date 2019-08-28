@@ -12,11 +12,9 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import com.holiday.house.api.dto.ReservationDTO;
-import com.holiday.house.api.dto.ReservationNotificationDTO;
 import com.holiday.house.api.dto.ReservationResponseDTO;
 import com.holiday.house.api.dto.RoomDTO;
 import com.house.holiday.client.boundary.HolidayHouseClient;
-import com.holiday.house.api.dto.ReservationNotificationResponseDTO;
 import com.house.holiday.domain.entity.ReservationResponse;
 import com.house.holiday.domain.entity.ReservationResponse.ReservationResponseBuilder;
 

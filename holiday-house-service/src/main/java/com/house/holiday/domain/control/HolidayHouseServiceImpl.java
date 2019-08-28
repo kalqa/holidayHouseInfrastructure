@@ -1,7 +1,7 @@
 package com.house.holiday.domain.control;
 
+import java.time.LocalDate;
 import java.util.Collection;
-import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -46,7 +46,7 @@ public class HolidayHouseServiceImpl implements HolidayHouseService {
     }
 
     @Override
-    public RoomResponse getAvailableRooms(Date fromDate, Date toDate) {
+    public RoomResponse getAvailableRooms(LocalDate fromDate, LocalDate toDate) {
         Collection<RoomDTO> allRooms = holidayHouseClient.getAllRooms().values();
         List<Room> availableRooms = getAvailableRooms(fromDate, toDate, allRooms);
 
@@ -64,7 +64,7 @@ public class HolidayHouseServiceImpl implements HolidayHouseService {
                 .build();
     }
 
-    private List<Room> getAvailableRooms(Date fromDate, Date toDate, Collection<RoomDTO> allRooms) {
+    private List<Room> getAvailableRooms(LocalDate fromDate, LocalDate toDate, Collection<RoomDTO> allRooms) {
         return allRooms.stream()
                 .filter(room -> getAvailableRoomsForPeriod(fromDate, toDate)
                         .contains(room.getRoomNumber()))
@@ -72,7 +72,7 @@ public class HolidayHouseServiceImpl implements HolidayHouseService {
                 .collect(Collectors.toList());
     }
 
-    private List<Integer> getAvailableRoomsForPeriod(Date fromDate, Date toDate) {
+    private List<Integer> getAvailableRoomsForPeriod(LocalDate fromDate, LocalDate toDate) {
         return holidayHouseClient.getAllReservations().stream()
                 .map(reservationDTO -> reservationMapper.mapToReservation(reservationDTO))
                 .filter(reservation -> isReservationNotAvailable(reservation, fromDate, toDate))
@@ -80,13 +80,13 @@ public class HolidayHouseServiceImpl implements HolidayHouseService {
                 .collect(Collectors.toList());
     }
 
-    private boolean isReservationNotAvailable(Reservation reservation, Date clientFromDate, Date clientToDate) {
-        Date fromDate = reservation.getFromDate();
-        Date toDate = reservation.getToDate();
+    private boolean isReservationNotAvailable(Reservation reservation, LocalDate clientFromDate, LocalDate clientToDate) {
+        LocalDate fromDate = reservation.getFromDate();
+        LocalDate toDate = reservation.getToDate();
         return !(isDataInRange(clientFromDate, fromDate, toDate) || isDataInRange(clientToDate, fromDate, toDate));
     }
 
-    private boolean isDataInRange(Date clientFromDate, Date fromDate, Date toDate) {
-        return !(clientFromDate.before(fromDate) || clientFromDate.after(toDate));
+    private boolean isDataInRange(LocalDate clientFromDate, LocalDate fromDate, LocalDate toDate) {
+        return !(clientFromDate.isBefore(fromDate) || clientFromDate.isAfter(toDate));
     }
 }

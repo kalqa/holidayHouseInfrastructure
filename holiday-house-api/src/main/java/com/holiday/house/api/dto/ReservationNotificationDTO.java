@@ -1,11 +1,12 @@
 package com.holiday.house.api.dto;
 
+import java.time.LocalDate;
 import java.util.Date;
 
 public class ReservationNotificationDTO {
 
     private String userName;
-    private Date when;
+    private LocalDate when;
 
     public String getUserName() {
         return userName;
@@ -15,11 +16,11 @@ public class ReservationNotificationDTO {
         this.userName = userName;
     }
 
-    public Date getWhen() {
+    public LocalDate getWhen() {
         return when;
     }
 
-    public void setWhen(Date when) {
+    public void setWhen(LocalDate when) {
         this.when = when;
     }
 }

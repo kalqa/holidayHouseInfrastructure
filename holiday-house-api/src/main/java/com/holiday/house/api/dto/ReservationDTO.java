@@ -1,6 +1,6 @@
 package com.holiday.house.api.dto;
 
-import java.util.Date;
+import java.time.LocalDate;
 
 import javax.xml.bind.annotation.XmlRootElement;
 
@@ -14,9 +14,9 @@ public class ReservationDTO {
     private Integer roomNumber;
     private String userName;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy")
-    private Date fromDate;
+    private LocalDate fromDate;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy")
-    private Date toDate;
+    private LocalDate toDate;
 
     public ReservationDTO() {
     }
@@ -34,22 +34,22 @@ public class ReservationDTO {
     }
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy")
-    public Date getFromDate() {
+    public LocalDate getFromDate() {
         return fromDate;
     }
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy")
-    public void setFromDate(Date fromDate) {
+    public void setFromDate(LocalDate fromDate) {
         this.fromDate = fromDate;
     }
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy")
-    public Date getToDate() {
+    public LocalDate getToDate() {
         return toDate;
     }
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy")
-    public void setToDate(Date toDate) {
+    public void setToDate(LocalDate toDate) {
         this.toDate = toDate;
     }
 
@@ -74,8 +74,8 @@ public class ReservationDTO {
     public static final class ReservationDTOBuilder {
 
         private Integer roomNumber;
-        private Date fromDate;
-        private Date toDate;
+        private LocalDate fromDate;
+        private LocalDate toDate;
         private String userName;
 
         private ReservationDTOBuilder() {
@@ -86,12 +86,12 @@ public class ReservationDTO {
             return this;
         }
 
-        public ReservationDTOBuilder withFromDate(Date fromDate) {
+        public ReservationDTOBuilder withFromDate(LocalDate fromDate) {
             this.fromDate = fromDate;
             return this;
         }
 
-        public ReservationDTOBuilder withToDate(Date toDate) {
+        public ReservationDTOBuilder withToDate(LocalDate toDate) {
             this.toDate = toDate;
             return this;
         }

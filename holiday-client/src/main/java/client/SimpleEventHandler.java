@@ -15,6 +15,9 @@ public class SimpleEventHandler implements EventHandler {
 
     @Override
     public void onMessage(String event, MessageEvent messageEvent) {
+        System.out.println("========= " + event);
+        String data = messageEvent.getData();
+        System.out.println("data======== " + data);
 //        if (event.equals("message")) {
 //            System.out.println("event NAME: " + event);
 //            System.out.println("ON MESSAGE:");

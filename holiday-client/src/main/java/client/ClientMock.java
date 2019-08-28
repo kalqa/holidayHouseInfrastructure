@@ -6,18 +6,22 @@ import java.io.InputStreamReader;
 import java.net.URI;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.time.LocalDate;
 import java.util.concurrent.TimeUnit;
 
 import javax.ws.rs.core.MediaType;
 
 import org.codehaus.jettison.json.JSONObject;
+import org.slf4j.LoggerFactory;
 
 import com.holiday.house.api.dto.ReservationDTO;
 import com.launchdarkly.eventsource.EventHandler;
 import com.launchdarkly.eventsource.EventSource;
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientResponse;
+
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.Logger;
 
 public class ClientMock {
 
@@ -26,6 +30,7 @@ public class ClientMock {
     private static Client restClient = Client.create();
 
     public static void main(String[] args) {
+        disableLogsFromSseProtcol();
 
         System.out.println("Please give me your nickname: ");
 
@@ -35,22 +40,31 @@ public class ClientMock {
             e.printStackTrace();
         }
 
-        EventHandler eventHandler = new SimpleEventHandler();
-        String url = String.format("http://localhost:8080/notification?nickName=" + nickName);
-        EventSource.Builder builder = new EventSource.Builder(eventHandler, URI.create(url));
+        Runnable myRunnable =
+                () -> {
+                    EventHandler eventHandler = new SimpleEventHandler();
+                    String url = String.format("http://localhost:8080/notification?nickName=" + nickName);
+                    EventSource.Builder builder = new EventSource.Builder(eventHandler, URI.create(url));
 
-        try (EventSource eventSource = builder.build()) {
-            eventSource.setReconnectionTimeMs(3000);
-            eventSource.start();
+                    try (EventSource eventSource = builder.build()) {
+                        eventSource.setReconnectionTimeMs(3000);
+                        eventSource.start();
 
-            TimeUnit.MINUTES.sleep(10);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+                        TimeUnit.MINUTES.sleep(10);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                };
 
-        int i = getOption();
+        Thread t1 = new Thread(myRunnable);
+        t1.start();
+
+        // in new thread ->
+
+        int i = 100;
 
         while (i != 4) {
+            i = getOption();
             switch (i) {
                 case 1:
                     handleAvailableRoomsSelection();
@@ -67,6 +81,11 @@ public class ClientMock {
                 default:
             }
         }
+    }
+
+    private static void disableLogsFromSseProtcol() {
+        Logger root = (Logger) LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
+        root.setLevel(Level.OFF);
     }
 
     private static int getOption() {
@@ -159,8 +178,10 @@ public class ClientMock {
             String leaveDate = "12-08-2019";
 
             SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd-MM-yyyy");
-            Date arrivalDateParsed = simpleDateFormat.parse(arrivalDate);
-            Date leaveDateParsed = simpleDateFormat.parse(leaveDate);
+//            LocalDate arrivalDateParsed = simpleDateFormat.parse(arrivalDate);
+            LocalDate arrivalDateParsed = LocalDate.parse(arrivalDate);
+//            LocalDate leaveDateParsed = simpleDateFormat.parse(leaveDate);
+            LocalDate leaveDateParsed = LocalDate.parse(leaveDate);
 
             ReservationDTO reservationDTO = ReservationDTO.builder()
                     .withRoomNumber(Integer.parseInt(roomNumber))

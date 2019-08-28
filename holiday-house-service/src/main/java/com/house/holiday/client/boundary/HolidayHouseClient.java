@@ -13,7 +13,6 @@ public interface HolidayHouseClient {
 
     Map<String, RoomDTO> getAllRooms();
     ReservationResponse makeReservation(ReservationDTO reservationDto);
-    ReservationNotificationResponseDTO makeReservationNotification(ReservationNotificationDTO reservationNotificationDTO);
     String cancelReservation(String reservationId);
     Collection<ReservationDTO> getAllReservations();
 }
