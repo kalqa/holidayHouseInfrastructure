@@ -1,22 +1,28 @@
+package client;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.net.URI;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.concurrent.TimeUnit;
 
 import javax.ws.rs.core.MediaType;
 
+import org.codehaus.jettison.json.JSONObject;
+
 import com.holiday.house.api.dto.ReservationDTO;
+import com.launchdarkly.eventsource.EventHandler;
+import com.launchdarkly.eventsource.EventSource;
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientResponse;
-import org.codehaus.jettison.json.JSONObject;
 
 public class ClientMock {
 
     private static String nickName;
     private static BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
-    //    private static Client restClient = ClientBuilder.newClient();
     private static Client restClient = Client.create();
 
     public static void main(String[] args) {
@@ -26,6 +32,19 @@ public class ClientMock {
         try {
             nickName = in.readLine();
         } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        EventHandler eventHandler = new SimpleEventHandler();
+        String url = String.format("http://localhost:8080/notification?nickName=" + nickName);
+        EventSource.Builder builder = new EventSource.Builder(eventHandler, URI.create(url));
+
+        try (EventSource eventSource = builder.build()) {
+            eventSource.setReconnectionTimeMs(3000);
+            eventSource.start();
+
+            TimeUnit.MINUTES.sleep(10);
+        } catch (InterruptedException e) {
             e.printStackTrace();
         }
 
