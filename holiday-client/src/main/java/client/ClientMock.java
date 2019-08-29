@@ -6,25 +6,45 @@ import java.io.InputStreamReader;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
+import javax.ws.rs.client.Client;
+import javax.ws.rs.client.ClientBuilder;
+import javax.ws.rs.client.Entity;
+import javax.ws.rs.core.GenericType;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
 
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider;
 import com.holiday.house.api.dto.ReservationDTO;
-import com.sun.jersey.api.client.Client;
-import com.sun.jersey.api.client.ClientResponse;
-import org.codehaus.jettison.json.JSONObject;
+import com.holiday.house.api.dto.ReservationResponseDTO;
+import com.holiday.house.api.dto.RoomResponseDTO;
+import org.glassfish.jersey.client.ClientConfig;
 import org.slf4j.LoggerFactory;
 
 public class ClientMock {
 
     private static String nickName;
     private static BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
-    private static Client restClient = Client.create();
+    //    private static Client restClient = Client.create();
+    private static Client restClient;
 
     public static void main(String[] args) {
         disableLogsFromSseProtcol();
+
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.registerModule(new JavaTimeModule());
+
+        JacksonJsonProvider provider = new JacksonJsonProvider(mapper);
+        restClient = ClientBuilder.newClient(new ClientConfig().register(provider));
 
         System.out.println("Please give me your nickname: ");
 
@@ -64,22 +84,53 @@ public class ClientMock {
         // 2. list the ids for to the UI
         // 3. get number
 
+        List<String> ids = new ArrayList<>();
 
         try {
-            ClientResponse response = restClient
-                    .resource("http://127.0.0.1:8080/holiday-house-service/reservation")
+            Response response = restClient
+                    .target("http://127.0.0.1:8080/holiday-house-service/reservation")
                     .queryParam("nickName", nickName)
-                    .accept(MediaType.APPLICATION_JSON)
-                    .get(ClientResponse.class);
+                    .request()
+                    .get(Response.class);
 
-            JSONObject roomResponse = response.getEntity(JSONObject.class);
+            ReservationResponseDTO reservationResponseDTO = response.readEntity(new GenericType<ReservationResponseDTO>() {});
 
-            System.out.println(roomResponse.getJSONArray("availableRooms"));
-            //maybe sleep
+            Map<String, ReservationDTO> reservationDTOs = reservationResponseDTO.getReservationDTOs();
+
+            int i = 0;
+            for (Map.Entry entry : reservationDTOs.entrySet()) {
+                ids.add(entry.getKey().toString());
+                System.out.println("Reservation " + (i + 1) + ":" + entry.getKey() + ", " + ((ReservationDTO) entry.getValue()).getRoomNumber());
+                i++;
+            }
+
+            System.out.println("Please select one of your reservation. Just type in number associated with reservation");
+            String reservationNo;
+            try {
+                reservationNo = in.readLine();
+                int i1 = Integer.parseInt(reservationNo);
+
+                String s = ids.get(i1 - 1);
+                Response deleteResponse = requestReservationDeleteById(s);
+
+                if (deleteResponse.getStatus() == Status.OK.getStatusCode()) {
+                    ReservationResponseDTO reservationResponseDTO1 = deleteResponse.readEntity(ReservationResponseDTO.class);
+                    System.out.println(reservationResponseDTO1.getId());
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
 
+    private static Response requestReservationDeleteById(String i1) {
+        return restClient
+                .target("http://127.0.0.1:8080/holiday-house-service/reservation")
+                .path(i1)
+                .request()
+                .delete();
     }
 
     private static void startNotificationListenerInNewThread() {
@@ -138,17 +189,20 @@ public class ClientMock {
         }
 
         try {
-            ClientResponse response = restClient
-                    .resource("http://127.0.0.1:8080/holiday-house-service/room")
+            Response response = restClient
+                    .target("http://127.0.0.1:8080/holiday-house-service/room")
                     .queryParam("arrivalDate", arrivalDate)
                     .queryParam("leaveDate", leaveDate)
-                    .accept(MediaType.APPLICATION_JSON)
-                    .get(ClientResponse.class);
+                    .request(MediaType.APPLICATION_JSON)
+                    .get(Response.class);
 
-            JSONObject roomResponse = response.getEntity(JSONObject.class);
+            RoomResponseDTO roomResponse = response.readEntity(new GenericType<RoomResponseDTO>() {});
 
-            System.out.println(roomResponse.getJSONArray("availableRooms"));
-            //maybe sleep
+            System.out.println(roomResponse.getAvailableRooms());
+
+            System.out.println("Available rooms: ");
+
+            roomResponse.getAvailableRooms().forEach(roomDTO -> System.out.println(roomDTO.getRoomNumber().toString()));
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -168,8 +222,8 @@ public class ClientMock {
     }
 
     private static void handleMakingReservation() {
-        System.out.println("Please give me arrival date (dd-MM-yyyy)");
-        System.out.println("Please give me date when you will leave room (dd-MM-yyyy)");
+//        System.out.println("Please give me arrival date (dd-MM-yyyy)");
+//        System.out.println("Please give me date when you will leave room (dd-MM-yyyy)");
         System.out.println("Please give me room number");
 
 //        String arrivalDate = null;
@@ -182,11 +236,9 @@ public class ClientMock {
             String arrivalDate = "10-08-2019";
             String leaveDate = "12-08-2019";
 
-            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd-MM-yyyy");
-//            LocalDate arrivalDateParsed = simpleDateFormat.parse(arrivalDate);
-            LocalDate arrivalDateParsed = LocalDate.parse(arrivalDate);
-//            LocalDate leaveDateParsed = simpleDateFormat.parse(leaveDate);
-            LocalDate leaveDateParsed = LocalDate.parse(leaveDate);
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+            LocalDate arrivalDateParsed = LocalDate.parse(arrivalDate, formatter);
+            LocalDate leaveDateParsed = LocalDate.parse(leaveDate, formatter);
 
             ReservationDTO reservationDTO = ReservationDTO.builder()
                     .withRoomNumber(Integer.parseInt(roomNumber))
@@ -195,13 +247,18 @@ public class ClientMock {
                     .withUserName(nickName)
                     .build();
 
-            ClientResponse response = restClient
-                    .resource("http://127.0.0.1:8080/holiday-house-service/reservation")
-                    .accept("application/json")
-                    .type("application/json")
-                    .post(ClientResponse.class, reservationDTO);
+            Response response = restClient
+                    .target("http://127.0.0.1:8080/holiday-house-service/reservation")
+                    .request()
+                    .post(Entity.entity(reservationDTO, MediaType.APPLICATION_JSON));
 
-            System.out.println(response);
+            if (response.getStatus() == Status.OK.getStatusCode()) {
+                ReservationDTO reservationDTO1 = response.readEntity(ReservationDTO.class);
+                System.out.println("Reservation id: " + reservationDTO1.getId());
+            } else {
+                // zaimplementowac reservation response dto
+                System.out.println();
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }

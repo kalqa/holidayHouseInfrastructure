@@ -14,6 +14,7 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
 import com.holiday.house.api.dto.ReservationDTO;
+import com.holiday.house.api.dto.ReservationResponseDTO;
 
 @Produces(MediaType.APPLICATION_JSON)
 @Path(ReservationResource.RESOURCE_PATH)
@@ -28,7 +29,7 @@ public class ReservationResource {
     ReservationMapper reservationMapper;
 
     @GET
-    public Collection<ReservationDTO> getAllReservations(@QueryParam("nickName") String nickName) {
+    public ReservationResponseDTO getAllReservations(@QueryParam("nickName") String nickName) {
         return holidayHouseService.getAllReservationsByNickName(nickName);
     }
 
@@ -41,7 +42,7 @@ public class ReservationResource {
 
     @DELETE
     @Path("/{id}")
-    public ReservationDTO cancelReservation(@PathParam("id") String id) {
+    public ReservationResponseDTO cancelReservation(@PathParam("id") String id) {
         return holidayHouseService.cancelReservationById(id);
     }
 }

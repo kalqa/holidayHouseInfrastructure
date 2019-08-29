@@ -1,7 +1,6 @@
 package com.house.holiday.client.control;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Map;
 
 import javax.ws.rs.ProcessingException;
@@ -14,6 +13,8 @@ import javax.ws.rs.core.Response;
 
 import com.holiday.house.api.dto.ReservationDTO;
 import com.holiday.house.api.dto.ReservationDTO.ReservationDTOBuilder;
+import com.holiday.house.api.dto.ReservationResponseDTO;
+import com.holiday.house.api.dto.ReservationResponseDTO.ReservationResponseDTOBuilder;
 import com.holiday.house.api.dto.RoomDTO;
 import com.house.holiday.client.boundary.HolidayHouseClient;
 
@@ -63,18 +64,20 @@ public class HolidayHouseClientImpl implements HolidayHouseClient {
     }
 
     @Override
-    public ReservationDTO cancelReservationById(String reservationId) {
+    public ReservationResponseDTO cancelReservationById(String reservationId) {
         Response response = null;
-        ReservationDTOBuilder reservationResponse = ReservationDTO.builder();
+        ReservationResponseDTOBuilder reservationResponse = ReservationResponseDTOBuilder.aReservationResponseDTO();
 
         try {
             response = restClient
-                    .target("https://houseinfrastructurev1.firebaseio.com/reservations.json?")
+                    .target("https://houseinfrastructurev1.firebaseio.com/reservations")
+                    .path(reservationId)
+                    .path(".json")
                     .request()
                     .delete();
 
             if (response.getStatus() == Response.Status.OK.getStatusCode()) {
-                return ReservationDTO.builder().withId(reservationId).build();
+                return ReservationResponseDTO.ReservationResponseDTOBuilder.aReservationResponseDTO().withId(reservationId).build();
             } else {
                 //logger
                 reservationResponse.withId("failed");
@@ -104,9 +107,9 @@ public class HolidayHouseClientImpl implements HolidayHouseClient {
     }
 
     @Override
-    public Collection<ReservationDTO> getAllReservationsByNickName(String nickName) {
+    public ReservationResponseDTO getAllReservationsByNickName(String nickName) {
         Response response = null;
-        ReservationDTOBuilder reservationResponse = ReservationDTO.builder();
+        ReservationResponseDTOBuilder reservationResponse = ReservationResponseDTOBuilder.aReservationResponseDTO();
 
         try {
             response = restClient
@@ -115,8 +118,9 @@ public class HolidayHouseClientImpl implements HolidayHouseClient {
                     .get();
 
             if (response.getStatus() == Response.Status.OK.getStatusCode()) {
-                return response.readEntity(new GenericType<Map<String, ReservationDTO>>() {})
-                        .values(); // TODO tutaj cos do zmiany
+                Map<String, ReservationDTO> stringReservationDTOMap = response.readEntity(new GenericType<Map<String, ReservationDTO>>() {});
+                return reservationResponse
+                        .withReservations(stringReservationDTOMap).build();
             } else {
                 //logger
                 reservationResponse.withId("failed");
@@ -132,6 +136,6 @@ public class HolidayHouseClientImpl implements HolidayHouseClient {
             }
         }
 
-        return Collections.singleton(reservationResponse.build());
+        return reservationResponse.build();
     }
 }

@@ -4,12 +4,13 @@ import java.time.LocalDate;
 import java.util.Collection;
 
 import com.holiday.house.api.dto.ReservationDTO;
-import com.house.holiday.domain.entity.RoomResponse;
+import com.holiday.house.api.dto.ReservationResponseDTO;
+import com.holiday.house.api.dto.RoomResponseDTO;
 
 public interface HolidayHouseService {
 
     ReservationDTO makeReservation(ReservationDTO reservationDTO);
-    RoomResponse getAvailableRooms(LocalDate fromDate, LocalDate toDate);
-    ReservationDTO cancelReservationById(String id);
-    Collection<ReservationDTO> getAllReservationsByNickName(String nickName);
+    RoomResponseDTO getAvailableRooms(LocalDate fromDate, LocalDate toDate);
+    ReservationResponseDTO cancelReservationById(String id);
+    ReservationResponseDTO getAllReservationsByNickName(String nickName);
 }

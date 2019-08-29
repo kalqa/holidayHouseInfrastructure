@@ -8,14 +8,14 @@ import java.util.stream.Collectors;
 import javax.inject.Inject;
 
 import com.holiday.house.api.dto.ReservationDTO;
+import com.holiday.house.api.dto.ReservationResponseDTO;
 import com.holiday.house.api.dto.RoomDTO;
+import com.holiday.house.api.dto.RoomResponseDTO;
 import com.house.holiday.client.control.HolidayHouseClientImpl;
 import com.house.holiday.domain.boundary.HolidayHouseService;
 import com.house.holiday.domain.boundary.ReservationMapper;
 import com.house.holiday.domain.boundary.RoomMapper;
 import com.house.holiday.domain.entity.Reservation;
-import com.house.holiday.domain.entity.Room;
-import com.house.holiday.domain.entity.RoomResponse;
 
 public class HolidayHouseServiceImpl implements HolidayHouseService {
 
@@ -45,30 +45,30 @@ public class HolidayHouseServiceImpl implements HolidayHouseService {
     }
 
     @Override
-    public RoomResponse getAvailableRooms(LocalDate fromDate, LocalDate toDate) {
+    public RoomResponseDTO getAvailableRooms(LocalDate fromDate, LocalDate toDate) {
         Collection<RoomDTO> allRooms = holidayHouseClient.getAllRooms().values();
-        List<Room> availableRooms = getAvailableRooms(fromDate, toDate, allRooms);
+        List<RoomDTO> availableRooms = getAvailableRooms(fromDate, toDate, allRooms);
 
-        return RoomResponse.builder()
+        return RoomResponseDTO.builder()
                 .withAvailableRooms(availableRooms)
                 .build();
     }
 
     @Override
-    public ReservationDTO cancelReservationById(String reservationId) {
+    public ReservationResponseDTO cancelReservationById(String reservationId) {
         return holidayHouseClient.cancelReservationById(reservationId);
     }
 
     @Override
-    public Collection<ReservationDTO> getAllReservationsByNickName(String nickName) {
+    public ReservationResponseDTO getAllReservationsByNickName(String nickName) {
         return holidayHouseClient.getAllReservationsByNickName(nickName);
     }
 
-    private List<Room> getAvailableRooms(LocalDate fromDate, LocalDate toDate, Collection<RoomDTO> allRooms) {
+    private List<RoomDTO> getAvailableRooms(LocalDate fromDate, LocalDate toDate, Collection<RoomDTO> allRooms) {
         return allRooms.stream()
                 .filter(room -> getAvailableRoomsForPeriod(fromDate, toDate)
                         .contains(room.getRoomNumber()))
-                .map(roomDTO -> roomMapper.mapToRoom(roomDTO))
+//                .map(roomDTO -> roomMapper.mapToRoom(roomDTO))
                 .collect(Collectors.toList());
     }
 
