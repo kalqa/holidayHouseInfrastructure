@@ -14,6 +14,13 @@ public class RoomResponseDTO {
         return availableRooms;
     }
 
+    @Override
+    public String toString() {
+        return "RoomResponseDTO{" +
+                "availableRooms=" + availableRooms +
+                '}';
+    }
+
     public static final class RoomResponseDTOBuilder {
 
         private Collection<RoomDTO> availableRooms;

@@ -94,7 +94,7 @@ public class HolidayHouseClientImpl implements HolidayHouseClient {
     @Override
     public ReservationResponseDTO cancelReservationById(String reservationId) {
         Response response = null;
-        ReservationResponseDTOBuilder reservationResponse = ReservationResponseDTOBuilder.aReservationResponseDTO();
+        ReservationResponseDTOBuilder reservationResponse = ReservationResponseDTO.builder();
 
         try {
             response = restClient
@@ -130,7 +130,7 @@ public class HolidayHouseClientImpl implements HolidayHouseClient {
     @Override
     public ReservationResponseDTO getAllReservations() {
         Response response = null;
-        ReservationResponseDTOBuilder reservationResponse = ReservationResponseDTOBuilder.aReservationResponseDTO();
+        ReservationResponseDTOBuilder reservationResponse = ReservationResponseDTO.builder();
 
         try {
             response = restClient
@@ -163,7 +163,7 @@ public class HolidayHouseClientImpl implements HolidayHouseClient {
     @Override
     public ReservationResponseDTO getAllReservationsByNickName(String nickName) {
         Response response = null;
-        ReservationResponseDTOBuilder reservationResponse = ReservationResponseDTOBuilder.aReservationResponseDTO();
+        ReservationResponseDTOBuilder reservationResponse = ReservationResponseDTO.builder();
 
         try {
             response = restClient

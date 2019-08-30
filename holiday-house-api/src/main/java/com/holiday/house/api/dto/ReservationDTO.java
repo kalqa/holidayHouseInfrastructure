@@ -89,7 +89,8 @@ public class ReservationDTO {
     @Override
     public String toString() {
         return "ReservationDTO{" +
-                "roomNumber=" + roomNumber +
+                "id='" + id + '\'' +
+                ", roomNumber=" + roomNumber +
                 ", userName='" + userName + '\'' +
                 ", fromDate=" + fromDate +
                 ", toDate=" + toDate +

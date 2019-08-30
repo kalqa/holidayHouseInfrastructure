@@ -16,6 +16,13 @@ public class RoomDTO {
         this.roomNumber = roomNumber;
     }
 
+    @Override
+    public String toString() {
+        return "RoomDTO{" +
+                "roomNumber=" + roomNumber +
+                '}';
+    }
+
     public static class RoomDTOBuilder {
 
         private Integer roomNumber;
