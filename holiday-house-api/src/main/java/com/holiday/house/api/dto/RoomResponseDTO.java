@@ -1,27 +1,27 @@
 package com.holiday.house.api.dto;
 
-import java.util.List;
+import java.util.Collection;
 
 public class RoomResponseDTO {
 
-    private List<RoomDTO> availableRooms;
+    private Collection<RoomDTO> availableRooms;
 
     public static RoomResponseDTOBuilder builder() {
         return new RoomResponseDTOBuilder();
     }
 
-    public List<RoomDTO> getAvailableRooms() {
+    public Collection<RoomDTO> getAvailableRooms() {
         return availableRooms;
     }
 
     public static final class RoomResponseDTOBuilder {
 
-        private List<RoomDTO> availableRooms;
+        private Collection<RoomDTO> availableRooms;
 
         private RoomResponseDTOBuilder() {
         }
 
-        public RoomResponseDTOBuilder withAvailableRooms(List<RoomDTO> rooms) {
+        public RoomResponseDTOBuilder withAvailableRooms(Collection<RoomDTO> rooms) {
             this.availableRooms = rooms;
             return this;
         }

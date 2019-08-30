@@ -19,23 +19,25 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
-import ch.qos.logback.classic.Level;
-import ch.qos.logback.classic.Logger;
+import org.glassfish.jersey.client.ClientConfig;
+import org.slf4j.LoggerFactory;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider;
 import com.holiday.house.api.dto.ReservationDTO;
 import com.holiday.house.api.dto.ReservationResponseDTO;
 import com.holiday.house.api.dto.RoomResponseDTO;
-import org.glassfish.jersey.client.ClientConfig;
-import org.slf4j.LoggerFactory;
+
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.Logger;
 
 public class ClientMock {
 
     private static String nickName;
     private static BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
-    //    private static Client restClient = Client.create();
     private static Client restClient;
+    private static Thread notificationThread;
 
     public static void main(String[] args) {
         disableLogsFromSseProtcol();
@@ -56,35 +58,27 @@ public class ClientMock {
 
         startNotificationListenerInNewThread();
 
-        int i = 0;
-        while (i != 4) {
+        int i;
+        do {
             i = getOption();
             switch (i) {
                 case 1:
                     handleAvailableRoomsSelection();
-                    i = getOption();
                     break;
                 case 2:
                     handleMakingReservation();
-                    i = getOption();
                     break;
                 case 3:
                     handleCancelingReservation(nickName);
-                    i = getOption();
                     break;
-                case 4:
-                    return;
                 default:
+                    notificationThread.interrupt();
+                    return;
             }
-        }
+        } while (true);
     }
 
     private static void handleCancelingReservation(String nickName) {
-        // 1. get All nickname reservation
-        // 2. list the ids for to the UI
-        // 3. get number
-
-        List<String> ids = new ArrayList<>();
 
         try {
             Response response = restClient
@@ -97,6 +91,7 @@ public class ClientMock {
 
             Map<String, ReservationDTO> reservationDTOs = reservationResponseDTO.getReservationDTOs();
 
+            List<String> ids = new ArrayList<>();
             int i = 0;
             for (Map.Entry entry : reservationDTOs.entrySet()) {
                 ids.add(entry.getKey().toString());
@@ -105,17 +100,21 @@ public class ClientMock {
             }
 
             System.out.println("Please select one of your reservation. Just type in number associated with reservation");
-            String reservationNo;
+            System.out.println("Type 'q' and hit enter to leave");
+            String reservationClientInput;
             try {
-                reservationNo = in.readLine();
-                int i1 = Integer.parseInt(reservationNo);
+                reservationClientInput = in.readLine();
+                if (reservationClientInput.equalsIgnoreCase("q")) {
+                    return;
+                }
+                int reservationNumber = Integer.parseInt(reservationClientInput);
 
-                String s = ids.get(i1 - 1);
+                String s = ids.get(reservationNumber - 1);
                 Response deleteResponse = requestReservationDeleteById(s);
 
                 if (deleteResponse.getStatus() == Status.OK.getStatusCode()) {
                     ReservationResponseDTO reservationResponseDTO1 = deleteResponse.readEntity(ReservationResponseDTO.class);
-                    System.out.println(reservationResponseDTO1.getId());
+                    System.out.println("Your reservation with id: " + reservationResponseDTO1.getId() + " has been canceled");
                 }
             } catch (IOException e) {
                 e.printStackTrace();
@@ -135,8 +134,8 @@ public class ClientMock {
 
     private static void startNotificationListenerInNewThread() {
         NotificationListener notificationListener = new NotificationListener(nickName);
-        Thread t1 = new Thread(notificationListener);
-        t1.start();
+        notificationThread = new Thread(notificationListener);
+        notificationThread.start();
     }
 
     private static void disableLogsFromSseProtcol() {
@@ -196,13 +195,13 @@ public class ClientMock {
                     .request(MediaType.APPLICATION_JSON)
                     .get(Response.class);
 
-            RoomResponseDTO roomResponse = response.readEntity(new GenericType<RoomResponseDTO>() {});
-
-            System.out.println(roomResponse.getAvailableRooms());
-
-            System.out.println("Available rooms: ");
-
-            roomResponse.getAvailableRooms().forEach(roomDTO -> System.out.println(roomDTO.getRoomNumber().toString()));
+            if (response.getStatus() == Status.OK.getStatusCode()) {
+                RoomResponseDTO roomResponse = response.readEntity(new GenericType<RoomResponseDTO>() {});
+                System.out.println("Available rooms: ");
+                roomResponse.getAvailableRooms().forEach(roomDTO -> System.out.println(roomDTO.getRoomNumber().toString()));
+            } else {
+                System.out.println("Sorry problem with server. Response from server: " + response.toString());
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -261,10 +260,6 @@ public class ClientMock {
             }
         } catch (Exception e) {
             e.printStackTrace();
-        }
-
-        if (roomNumber == null) {
-            return;
         }
     }
 }

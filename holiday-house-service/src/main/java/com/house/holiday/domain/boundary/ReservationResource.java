@@ -25,9 +25,6 @@ public class ReservationResource {
     @Inject
     HolidayHouseService holidayHouseService;
 
-    @Inject
-    ReservationMapper reservationMapper;
-
     @GET
     public ReservationResponseDTO getAllReservations(@QueryParam("nickName") String nickName) {
         return holidayHouseService.getAllReservationsByNickName(nickName);

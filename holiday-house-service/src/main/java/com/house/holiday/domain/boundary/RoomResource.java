@@ -27,8 +27,6 @@ public class RoomResource {
     @Produces(MediaType.APPLICATION_JSON)
     public Response getAvailableRooms(@QueryParam("arrivalDate") String arrivalDate,
                                       @QueryParam("leaveDate") String leaveDate) {
-
-//        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd-MM-yyyy");
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
 
         LocalDate clientFromDate;
@@ -40,14 +38,6 @@ public class RoomResource {
         RoomResponseDTO roomResponse = holidayHouseService.getAvailableRooms(clientFromDate, clientToDate);
         return buildResponse(roomResponse);
     }
-
-//    private Response buildFailResponse(String message) {
-//        return Response.status(Status.BAD_REQUEST)
-//                .entity(RoomResponse.builder()
-//                        .withMessage(message)
-//                        .build())
-//                .type(MediaType.APPLICATION_JSON).build();
-//    }
 
     private Response buildResponse(RoomResponseDTO roomResponse) {
         return Response.ok(roomResponse)

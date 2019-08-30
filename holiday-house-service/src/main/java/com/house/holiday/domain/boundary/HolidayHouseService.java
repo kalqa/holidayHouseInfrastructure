@@ -1,7 +1,6 @@
 package com.house.holiday.domain.boundary;
 
 import java.time.LocalDate;
-import java.util.Collection;
 
 import com.holiday.house.api.dto.ReservationDTO;
 import com.holiday.house.api.dto.ReservationResponseDTO;
