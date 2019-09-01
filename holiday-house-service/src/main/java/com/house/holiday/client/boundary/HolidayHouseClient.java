@@ -9,6 +9,6 @@ public interface HolidayHouseClient {
     RoomResponseDTO getAllRooms();
     ReservationResponseDTO getAllReservations();
     ReservationResponseDTO getAllReservationsByNickName(String nickName);
-    ReservationDTO makeReservation(ReservationDTO reservationDto);
+    ReservationResponseDTO makeReservation(ReservationDTO reservationDto);
     ReservationResponseDTO cancelReservationById(String reservationId);
 }

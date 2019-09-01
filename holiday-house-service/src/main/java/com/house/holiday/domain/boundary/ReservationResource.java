@@ -1,7 +1,5 @@
 package com.house.holiday.domain.boundary;
 
-import java.util.Collection;
-
 import javax.inject.Inject;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -32,9 +30,8 @@ public class ReservationResource {
 
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
-    public ReservationDTO makeReservation(ReservationDTO reservationDTO) {
+    public ReservationResponseDTO makeReservation(ReservationDTO reservationDTO) {
         return holidayHouseService.makeReservation(reservationDTO);
-
     }
 
     @DELETE

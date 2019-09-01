@@ -11,16 +11,18 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import com.holiday.house.api.dto.ReservationDTO;
-import com.holiday.house.api.dto.ReservationDTO.ReservationDTOBuilder;
 import com.holiday.house.api.dto.ReservationResponseDTO;
 import com.holiday.house.api.dto.ReservationResponseDTO.ReservationResponseDTOBuilder;
 import com.holiday.house.api.dto.RoomDTO;
 import com.holiday.house.api.dto.RoomResponseDTO;
 import com.holiday.house.api.dto.RoomResponseDTO.RoomResponseDTOBuilder;
 import com.house.holiday.client.boundary.HolidayHouseClient;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class HolidayHouseClientImpl implements HolidayHouseClient {
 
+    private Logger logger = LoggerFactory.getLogger(HolidayHouseClientImpl.class);
     private Client restClient = ClientBuilder.newClient();
 
     @Override
@@ -39,7 +41,7 @@ public class HolidayHouseClientImpl implements HolidayHouseClient {
                 roomResponseBuilder.withAvailableRooms(stringRoomDTOMap.values());
             } else {
                 //logger
-//                roomResponseBuilder.withMessage("failed"); // TODO ADD MESSAGE TO RESPONSES !!!
+                roomResponseBuilder.withMessage("bla"); // TODO
             }
         } catch (ProcessingException e) {
             //logger
@@ -57,9 +59,9 @@ public class HolidayHouseClientImpl implements HolidayHouseClient {
     }
 
     @Override
-    public ReservationDTO makeReservation(ReservationDTO reservationDto) {
+    public ReservationResponseDTO makeReservation(ReservationDTO reservationDto) {
         Response response = null;
-        ReservationDTOBuilder reservationResponse = ReservationDTO.builder();
+        ReservationResponseDTOBuilder reservationResponseBuilder = ReservationResponseDTO.builder();
 
         try {
             response = restClient
@@ -68,33 +70,30 @@ public class HolidayHouseClientImpl implements HolidayHouseClient {
                     .post(Entity.entity(reservationDto, MediaType.APPLICATION_JSON));
 
             if (response.getStatus() == Response.Status.OK.getStatusCode()) {
-                ReservationDTO reservationResponseDto = response.readEntity(new GenericType<ReservationDTO>() {});
-                reservationResponse.withId(reservationResponseDto.getId());
+                ReservationDTO reservationResponse = response.readEntity(new GenericType<ReservationDTO>() {});
+                String id = reservationResponse.getId();
+                reservationResponseBuilder.withId(id);
+                logger.info("Created reservation {} with id {}", reservationDto, id);
             } else {
-                //logger
-                String message = String.format("Could not make reservation by given for room: [%s]", reservationDto.getRoomNumber().toString());
-                System.out.println(message);
-                reservationResponse.withId(message);
+                reservationResponseBuilder.withMessage(String.format("Could not make reservation by given room: [%s]", reservationDto.getRoomNumber().toString()));
+                logger.error("Could not make reservation: {}. Status from server {}", reservationDto, response.getStatus());
             }
-        } catch (ProcessingException e) {
-            //logger
-            e.printStackTrace();
-            String message = e.getMessage();
-            System.out.println(message);
-            reservationResponse.withId(message);
+        } catch (Exception e) {
+            logger.error("Error while making reservation: {}", reservationDto, e);
+            reservationResponseBuilder.withMessage("Error while making reservation");
         } finally {
             if (response != null) {
                 response.close();
             }
         }
 
-        return reservationResponse.build();
+        return reservationResponseBuilder.build();
     }
 
     @Override
     public ReservationResponseDTO cancelReservationById(String reservationId) {
         Response response = null;
-        ReservationResponseDTOBuilder reservationResponse = ReservationResponseDTO.builder();
+        ReservationResponseDTOBuilder reservationResponseBuilder = ReservationResponseDTO.builder();
 
         try {
             response = restClient
@@ -105,32 +104,27 @@ public class HolidayHouseClientImpl implements HolidayHouseClient {
                     .delete();
 
             if (response.getStatus() == Response.Status.OK.getStatusCode()) {
-                reservationResponse.withId(reservationId).build();
+                reservationResponseBuilder.withId(reservationId).build();
             } else {
-                //logger
-                String message = String.format("Could not cancel reservation by given Id:: [%s]", reservationId);
-                System.out.println(message);
-                reservationResponse.withId(message);
+                logger.error("Could not cancel reservation with Id: {}. Status from server {}", reservationId, response.getStatus());
+                reservationResponseBuilder.withMessage(String.format("Could not cancel reservation by given Id: [%s]", reservationId));
             }
-        } catch (ProcessingException e) {
-            //logger
-            e.printStackTrace();
-            String message = e.getMessage();
-            System.out.println(message);
-            reservationResponse.withId(message);
+        } catch (Exception e) {
+            logger.error("Error while canceling reservation: {}", reservationId, e);
+            reservationResponseBuilder.withMessage("Error while canceling reservation");
         } finally {
             if (response != null) {
                 response.close();
             }
         }
 
-        return reservationResponse.build();
+        return reservationResponseBuilder.build();
     }
 
     @Override
     public ReservationResponseDTO getAllReservations() {
         Response response = null;
-        ReservationResponseDTOBuilder reservationResponse = ReservationResponseDTO.builder();
+        ReservationResponseDTOBuilder reservationResponseBuilder = ReservationResponseDTO.builder();
 
         try {
             response = restClient
@@ -140,30 +134,27 @@ public class HolidayHouseClientImpl implements HolidayHouseClient {
 
             if (response.getStatus() == Response.Status.OK.getStatusCode()) {
                 Map<String, ReservationDTO> reservationDTOS = response.readEntity(new GenericType<Map<String, ReservationDTO>>() {});
-                reservationResponse.withReservations(reservationDTOS);
+                reservationResponseBuilder.withReservations(reservationDTOS);
             } else {
-                //logger
-                reservationResponse.withId("failed");
+                logger.error("Could not get all reservations. Server status: {}", response.getStatus());
+                reservationResponseBuilder.withMessage(String.format("Could not get all reservations. Server status: %s", response.getStatus()));
             }
         } catch (Exception e) {
-            //logger
-            e.printStackTrace();
-            String message = "Could not get all Reservations." + e.getMessage();
-            System.out.println(message);
-            reservationResponse.withId(message);
+            logger.error("Error while getting all reservations", e);
+            reservationResponseBuilder.withMessage("Error while getting all reservations");
         } finally {
             if (response != null) {
                 response.close();
             }
         }
 
-        return reservationResponse.build();
+        return reservationResponseBuilder.build();
     }
 
     @Override
     public ReservationResponseDTO getAllReservationsByNickName(String nickName) {
         Response response = null;
-        ReservationResponseDTOBuilder reservationResponse = ReservationResponseDTO.builder();
+        ReservationResponseDTOBuilder reservationResponseBuilder = ReservationResponseDTO.builder();
 
         try {
             response = restClient
@@ -173,23 +164,20 @@ public class HolidayHouseClientImpl implements HolidayHouseClient {
 
             if (response.getStatus() == Response.Status.OK.getStatusCode()) {
                 Map<String, ReservationDTO> stringReservationDTOMap = response.readEntity(new GenericType<Map<String, ReservationDTO>>() {});
-                reservationResponse.withReservations(stringReservationDTOMap);
+                reservationResponseBuilder.withReservations(stringReservationDTOMap);
             } else {
-                //logger
-                reservationResponse.withId("failed");
+                logger.error("Error while getting all reservations for nickName. Server status: {}", response.getStatus());
+                reservationResponseBuilder.withMessage(String.format("Error while getting all reservations for nickName [%s]", nickName));
             }
-        } catch (ProcessingException e) {
-            //logger
-            e.printStackTrace();
-            String message = "Could not get all Reservations by NickName: [" + nickName + "] error: " + e.getMessage();
-            System.out.println(message);
-            reservationResponse.withId(message);
+        } catch (Exception e) {
+            logger.error("Error while getting all reservations for nickName: {}", nickName, e);
+            reservationResponseBuilder.withMessage(String.format("Could not get all Reservations by NickName: [%s] error: ", nickName));
         } finally {
             if (response != null) {
                 response.close();
             }
         }
 
-        return reservationResponse.build();
+        return reservationResponseBuilder.build();
     }
 }

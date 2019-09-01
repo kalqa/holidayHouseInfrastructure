@@ -44,7 +44,7 @@ public class ReservationDTO {
         return roomNumber;
     }
 
-    public void setRoomNumber(Integer roomNumber) {
+    private void setRoomNumber(Integer roomNumber) {
         this.roomNumber = roomNumber;
     }
 
@@ -55,7 +55,7 @@ public class ReservationDTO {
         return fromDate;
     }
 
-    public void setFromDate(LocalDate fromDate) {
+    private void setFromDate(LocalDate fromDate) {
         this.fromDate = fromDate;
     }
 
@@ -66,7 +66,7 @@ public class ReservationDTO {
         return toDate;
     }
 
-    public void setToDate(LocalDate toDate) {
+    private void setToDate(LocalDate toDate) {
         this.toDate = toDate;
     }
 
@@ -74,7 +74,7 @@ public class ReservationDTO {
         return userName;
     }
 
-    public void setUserName(String userName) {
+    private void setUserName(String userName) {
         this.userName = userName;
     }
 

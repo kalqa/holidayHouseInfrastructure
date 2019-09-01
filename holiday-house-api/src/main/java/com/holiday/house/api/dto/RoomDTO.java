@@ -12,7 +12,7 @@ public class RoomDTO {
         return roomNumber;
     }
 
-    public void setRoomNumber(Integer roomNumber) {
+    private void setRoomNumber(Integer roomNumber) {
         this.roomNumber = roomNumber;
     }
 

@@ -11,6 +11,8 @@ public class ReservationResponseDTO {
     @JsonProperty("name")
     private String id;
 
+    private String message;
+
     private Map<String, ReservationDTO> reservationDTOs;
 
     public static ReservationResponseDTOBuilder builder() {
@@ -21,8 +23,24 @@ public class ReservationResponseDTO {
         return id;
     }
 
+    private void setId(String id) {
+        this.id = id;
+    }
+
+    public String getMessage() {
+        return message;
+    }
+
+    public void setMessage(String message) {
+        this.message = message;
+    }
+
     public Map<String, ReservationDTO> getReservationDTOs() {
         return reservationDTOs;
+    }
+
+    private void setReservationDTOs(Map<String, ReservationDTO> reservationDTOs) {
+        this.reservationDTOs = reservationDTOs;
     }
 
     @Override
@@ -37,12 +55,13 @@ public class ReservationResponseDTO {
 
         private String id;
         private Map<String, ReservationDTO> reservationDTOs;
+        private String message;
 
         private ReservationResponseDTOBuilder() {
         }
 
-        public ReservationResponseDTOBuilder withId(String message) {
-            this.id = message;
+        public ReservationResponseDTOBuilder withId(String id) {
+            this.id = id;
             return this;
         }
 
@@ -51,10 +70,16 @@ public class ReservationResponseDTO {
             return this;
         }
 
+        public ReservationResponseDTOBuilder withMessage(String message) {
+            this.message = message;
+            return this;
+        }
+
         public ReservationResponseDTO build() {
             ReservationResponseDTO reservationResponseDTO = new ReservationResponseDTO();
-            reservationResponseDTO.id = this.id;
-            reservationResponseDTO.reservationDTOs = this.reservationDTOs;
+            reservationResponseDTO.setId(this.id);
+            reservationResponseDTO.setReservationDTOs(this.reservationDTOs);
+            reservationResponseDTO.setMessage(this.message);
             return reservationResponseDTO;
         }
     }

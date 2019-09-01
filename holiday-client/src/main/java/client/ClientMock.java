@@ -19,18 +19,16 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
-import org.glassfish.jersey.client.ClientConfig;
-import org.slf4j.LoggerFactory;
-
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.Logger;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider;
 import com.holiday.house.api.dto.ReservationDTO;
 import com.holiday.house.api.dto.ReservationResponseDTO;
 import com.holiday.house.api.dto.RoomResponseDTO;
-
-import ch.qos.logback.classic.Level;
-import ch.qos.logback.classic.Logger;
+import org.glassfish.jersey.client.ClientConfig;
+import org.slf4j.LoggerFactory;
 
 public class ClientMock {
 
@@ -177,10 +175,7 @@ public class ClientMock {
         try {
             arrivalDate = in.readLine();
             leaveDate = in.readLine();
-//            String arrivalDate = "10-08-2019";
-//            String leaveDate = "12-08-2019";
             if (!isDateInCorrectFormat(arrivalDate, leaveDate)) {
-                //logger data is not correct
                 return;
             }
         } catch (Exception e) {
@@ -221,19 +216,17 @@ public class ClientMock {
     }
 
     private static void handleMakingReservation() {
-//        System.out.println("Please give me arrival date (dd-MM-yyyy)");
-//        System.out.println("Please give me date when you will leave room (dd-MM-yyyy)");
+        System.out.println("Please give me arrival date (dd-MM-yyyy)");
+        System.out.println("Please give me date when you will leave room (dd-MM-yyyy)");
         System.out.println("Please give me room number");
 
-//        String arrivalDate = null;
-//        String leaveDate = null;
-        String roomNumber = null;
+        String arrivalDate;
+        String leaveDate;
+        String roomNumber;
         try {
-//            arrivalDate = in.readLine();
-//            leaveDate = in.readLine();
+            arrivalDate = in.readLine();
+            leaveDate = in.readLine();
             roomNumber = in.readLine();
-            String arrivalDate = "10-08-2019";
-            String leaveDate = "12-08-2019";
 
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
             LocalDate arrivalDateParsed = LocalDate.parse(arrivalDate, formatter);
@@ -252,11 +245,10 @@ public class ClientMock {
                     .post(Entity.entity(reservationDTO, MediaType.APPLICATION_JSON));
 
             if (response.getStatus() == Status.OK.getStatusCode()) {
-                ReservationDTO reservationDTO1 = response.readEntity(ReservationDTO.class);
-                System.out.println("Reservation id: " + reservationDTO1.getId());
+                ReservationResponseDTO reservationResponse = response.readEntity(ReservationResponseDTO.class);
+                System.out.println("Created reservation with id: " + reservationResponse.getId());
             } else {
-                // zaimplementowac reservation response dto
-                System.out.println();
+                System.out.println("Did not create reservation. Response status: " + response.getStatus());
             }
         } catch (Exception e) {
             e.printStackTrace();

@@ -6,14 +6,13 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 import javax.servlet.http.HttpServletResponse;
 
+import com.house.holiday.reminder.domain.entity.HolidayHouseClientEmitter;
+import com.house.holiday.reminder.domain.entity.ReservationNotification;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
-
-import com.house.holiday.reminder.domain.entity.HolidayHouseClientEmitter;
-import com.house.holiday.reminder.domain.entity.ReservationNotification;
 
 @Controller
 public class SSEController {

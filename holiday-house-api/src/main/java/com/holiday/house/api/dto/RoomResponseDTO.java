@@ -5,6 +5,7 @@ import java.util.Collection;
 public class RoomResponseDTO {
 
     private Collection<RoomDTO> availableRooms;
+    private String message;
 
     public static RoomResponseDTOBuilder builder() {
         return new RoomResponseDTOBuilder();
@@ -14,16 +15,30 @@ public class RoomResponseDTO {
         return availableRooms;
     }
 
+    private void setAvailableRooms(Collection<RoomDTO> availableRooms) {
+        this.availableRooms = availableRooms;
+    }
+
+    public String getMessage() {
+        return message;
+    }
+
+    private void setMessage(String message) {
+        this.message = message;
+    }
+
     @Override
     public String toString() {
         return "RoomResponseDTO{" +
                 "availableRooms=" + availableRooms +
+                ", message='" + message + '\'' +
                 '}';
     }
 
     public static final class RoomResponseDTOBuilder {
 
         private Collection<RoomDTO> availableRooms;
+        private String message;
 
         private RoomResponseDTOBuilder() {
         }
@@ -33,9 +48,15 @@ public class RoomResponseDTO {
             return this;
         }
 
+        public RoomResponseDTOBuilder withMessage(String message) {
+            this.message = message;
+            return this;
+        }
+
         public RoomResponseDTO build() {
             RoomResponseDTO roomResponse = new RoomResponseDTO();
-            roomResponse.availableRooms = this.availableRooms;
+            roomResponse.setAvailableRooms(this.availableRooms);
+            roomResponse.setMessage(this.message);
             return roomResponse;
         }
     }

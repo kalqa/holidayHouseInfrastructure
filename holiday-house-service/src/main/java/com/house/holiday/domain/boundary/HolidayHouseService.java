@@ -8,7 +8,7 @@ import com.holiday.house.api.dto.RoomResponseDTO;
 
 public interface HolidayHouseService {
 
-    ReservationDTO makeReservation(ReservationDTO reservationDTO);
+    ReservationResponseDTO makeReservation(ReservationDTO reservationDTO);
     RoomResponseDTO getAvailableRooms(LocalDate fromDate, LocalDate toDate);
     ReservationResponseDTO cancelReservationById(String id);
     ReservationResponseDTO getAllReservationsByNickName(String nickName);
