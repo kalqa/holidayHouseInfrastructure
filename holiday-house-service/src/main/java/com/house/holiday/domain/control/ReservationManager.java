@@ -16,7 +16,7 @@ public class ReservationManager {
     @Inject
     HolidayHouseClient holidayHouseClient;
 
-    Logger logger = LoggerFactory.getLogger(ReservationManager.class);
+    private Logger logger = LoggerFactory.getLogger(ReservationManager.class);
 
     public ReservationResponseDTO makeReservation(ReservationDTO reservationDto) {
         ReservationResponseDTOBuilder reservationResponseDTOBuilder = ReservationResponseDTO.builder();

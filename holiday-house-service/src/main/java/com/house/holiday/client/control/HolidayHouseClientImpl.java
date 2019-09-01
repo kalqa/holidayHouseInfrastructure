@@ -2,7 +2,6 @@ package com.house.holiday.client.control;
 
 import java.util.Map;
 
-import javax.ws.rs.ProcessingException;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Entity;
@@ -40,21 +39,17 @@ public class HolidayHouseClientImpl implements HolidayHouseClient {
                 Map<String, RoomDTO> stringRoomDTOMap = response.readEntity(new GenericType<Map<String, RoomDTO>>() {});
                 roomResponseBuilder.withAvailableRooms(stringRoomDTOMap.values());
             } else {
-                //logger
-                roomResponseBuilder.withMessage("bla"); // TODO
+                roomResponseBuilder.withMessage("Could not get all rooms");
+                logger.error("Could not get all rooms. Status from server {}", response.getStatus());
             }
-        } catch (ProcessingException e) {
-            //logger
-            e.printStackTrace();
-            String message = e.getMessage();
-            System.out.println(message);
-//            roomResponseBuilder.withMessage(message);  // TODO ADD MESSAGE TO RESPONSES !!!
+        } catch (Exception e) {
+            logger.error("Error while getting all rooms", e);
+            roomResponseBuilder.withMessage("Error while getting all rooms");
         } finally {
             if (response != null) {
                 response.close();
             }
         }
-
         return roomResponseBuilder.build();
     }
 
@@ -86,7 +81,6 @@ public class HolidayHouseClientImpl implements HolidayHouseClient {
                 response.close();
             }
         }
-
         return reservationResponseBuilder.build();
     }
 
@@ -117,7 +111,6 @@ public class HolidayHouseClientImpl implements HolidayHouseClient {
                 response.close();
             }
         }
-
         return reservationResponseBuilder.build();
     }
 
@@ -147,7 +140,6 @@ public class HolidayHouseClientImpl implements HolidayHouseClient {
                 response.close();
             }
         }
-
         return reservationResponseBuilder.build();
     }
 
@@ -177,7 +169,6 @@ public class HolidayHouseClientImpl implements HolidayHouseClient {
                 response.close();
             }
         }
-
         return reservationResponseBuilder.build();
     }
 }

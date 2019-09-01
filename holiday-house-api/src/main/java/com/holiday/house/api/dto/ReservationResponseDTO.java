@@ -47,6 +47,7 @@ public class ReservationResponseDTO {
     public String toString() {
         return "ReservationResponseDTO{" +
                 "id='" + id + '\'' +
+                ", message='" + message + '\'' +
                 ", reservationDTOs=" + reservationDTOs +
                 '}';
     }

@@ -1,7 +1,9 @@
 package com.house.holiday.domain.control;
 
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -16,15 +18,24 @@ import org.slf4j.LoggerFactory;
 
 public class RoomManager {
 
-    Logger logger = LoggerFactory.getLogger(RoomManager.class);
-
     @Inject
     HolidayHouseClient holidayHouseClient;
 
-    public RoomResponseDTO getAvailableRooms(LocalDate fromDate, LocalDate toDate) {
-        logger.info("Getting availableRooms from {} to: {}", fromDate, toDate);
+    private Logger logger = LoggerFactory.getLogger(RoomManager.class);
+
+    public RoomResponseDTO getAvailableRooms(String fromDate, String toDate) {
+        Optional<LocalDate> clientFromDate = parseDate(fromDate);
+        Optional<LocalDate> clientToDate = parseDate(toDate);
+
+        if (!clientFromDate.isPresent() || !clientToDate.isPresent()) {
+            return RoomResponseDTO.builder()
+                    .withMessage(String.format("Parse error for fromDate: %s and toDate: %s", fromDate, toDate))
+                    .build();
+        }
+
+        logger.info("Getting available rooms from {} to {}", fromDate, toDate);
         Set<Integer> allRoomsNumbers = getAllRoomNumbers();
-        Set<Integer> roomNumberThatCollide = getRoomNumbersThatCollide(fromDate, toDate);
+        Set<Integer> roomNumberThatCollide = getRoomNumbersThatCollide(clientFromDate.get(), clientToDate.get());
 
         try {
             allRoomsNumbers.removeAll(roomNumberThatCollide);
@@ -35,6 +46,19 @@ public class RoomManager {
         return RoomResponseDTO.builder()
                 .withAvailableRooms(getAvailableRoomsDTO(allRoomsNumbers))
                 .build();
+    }
+
+    private Optional<LocalDate> parseDate(String date) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+        LocalDate clientFromDate;
+
+        try {
+            clientFromDate = LocalDate.parse(date, formatter);
+            return Optional.of(clientFromDate);
+        } catch (Exception e) {
+            logger.error("Error while parsing date from String to LocalDate", e);
+            return Optional.empty();
+        }
     }
 
     private List<RoomDTO> getAvailableRoomsDTO(Set<Integer> allRoomsNumbers) {

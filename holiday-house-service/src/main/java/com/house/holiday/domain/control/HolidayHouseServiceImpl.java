@@ -1,7 +1,5 @@
 package com.house.holiday.domain.control;
 
-import java.time.LocalDate;
-
 import javax.inject.Inject;
 
 import com.holiday.house.api.dto.ReservationDTO;
@@ -23,7 +21,7 @@ public class HolidayHouseServiceImpl implements HolidayHouseService {
     }
 
     @Override
-    public RoomResponseDTO getAvailableRooms(LocalDate fromDate, LocalDate toDate) {
+    public RoomResponseDTO getAvailableRooms(String fromDate, String toDate) {
         return roomManager.getAvailableRooms(fromDate, toDate);
     }
 

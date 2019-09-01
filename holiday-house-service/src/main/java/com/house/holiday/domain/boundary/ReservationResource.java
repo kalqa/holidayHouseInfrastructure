@@ -15,6 +15,7 @@ import com.holiday.house.api.dto.ReservationDTO;
 import com.holiday.house.api.dto.ReservationResponseDTO;
 
 @Produces(MediaType.APPLICATION_JSON)
+@Consumes(MediaType.APPLICATION_JSON)
 @Path(ReservationResource.RESOURCE_PATH)
 public class ReservationResource {
 
@@ -29,7 +30,6 @@ public class ReservationResource {
     }
 
     @POST
-    @Consumes(MediaType.APPLICATION_JSON)
     public ReservationResponseDTO makeReservation(ReservationDTO reservationDTO) {
         return holidayHouseService.makeReservation(reservationDTO);
     }
