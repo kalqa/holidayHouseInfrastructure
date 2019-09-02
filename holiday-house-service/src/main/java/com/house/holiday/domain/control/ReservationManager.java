@@ -1,12 +1,16 @@
 package com.house.holiday.domain.control;
 
 import java.time.LocalDate;
+import java.util.Collection;
+import java.util.Map;
 
 import javax.inject.Inject;
 
 import com.holiday.house.api.dto.ReservationDTO;
 import com.holiday.house.api.dto.ReservationResponseDTO;
 import com.holiday.house.api.dto.ReservationResponseDTO.ReservationResponseDTOBuilder;
+import com.holiday.house.api.dto.RoomDTO;
+import com.holiday.house.api.dto.RoomResponseDTO;
 import com.house.holiday.client.boundary.HolidayHouseClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -55,8 +59,14 @@ public class ReservationManager {
     }
 
     private boolean isThereAnyCollisionWithGivenDate(ReservationDTO reservationDto) {
-        return holidayHouseClient.getAllReservations()
-                .getReservationDTOs()
+        ReservationResponseDTO allReservations = holidayHouseClient.getAllReservations();
+        Map<String, ReservationDTO> reservationDTOs = allReservations.getReservationDTOs();
+
+        if (reservationDTOs.size() == 0) {
+            return false;
+        }
+
+        return reservationDTOs
                 .values()
                 .stream()
                 .filter(reservation -> isRoomNumberEqualToClientRoomNumber(reservationDto, reservation))
@@ -64,7 +74,14 @@ public class ReservationManager {
     }
 
     private boolean doesRoomWithGivenNumberExist(Integer roomNumber) {
-        return holidayHouseClient.getAllRooms().getAvailableRooms()
+        RoomResponseDTO allRooms = holidayHouseClient.getAllRooms();
+        Collection<RoomDTO> availableRooms = allRooms.getAvailableRooms();
+
+        if (availableRooms.size() == 0) {
+            return false;
+        }
+
+        return availableRooms
                 .stream()
                 .anyMatch(roomDTO -> roomNumber.equals(roomDTO.getRoomNumber()));
     }
