@@ -12,6 +12,8 @@ import com.launchdarkly.eventsource.MessageEvent;
 
 public class SimpleEventHandler implements EventHandler {
 
+    private boolean notificationFired = false;
+
     @Override
     public void onOpen() {
     }
@@ -25,7 +27,10 @@ public class SimpleEventHandler implements EventHandler {
         try (JsonReader jsonReader = Json.createReader(new StringReader(messageEvent.getData()))) {
             JsonObject jsonObject = jsonReader.readObject();
             JsonValue message = jsonObject.getValue("/message");
-            System.out.println(message);
+            if (!notificationFired) {
+                System.out.println(message.toString());
+                notificationFired = true;
+            }
         }
     }
 

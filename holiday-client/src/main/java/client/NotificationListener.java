@@ -17,7 +17,7 @@ public class NotificationListener implements Runnable {
     @Override
     public void run() {
         EventHandler eventHandler = new SimpleEventHandler();
-        String url = String.format("http://localhost:8080/notification?nickName=" + nickName);
+        String url = String.format("http://localhost:9090/notification?nickName=" + nickName);
         EventSource.Builder builder = new EventSource.Builder(eventHandler, URI.create(url));
 
         try (EventSource eventSource = builder.build()) {

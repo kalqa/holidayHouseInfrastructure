@@ -19,18 +19,16 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
-import org.glassfish.jersey.client.ClientConfig;
-import org.slf4j.LoggerFactory;
-
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.Logger;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider;
 import com.holiday.house.api.dto.ReservationDTO;
 import com.holiday.house.api.dto.ReservationResponseDTO;
 import com.holiday.house.api.dto.RoomResponseDTO;
-
-import ch.qos.logback.classic.Level;
-import ch.qos.logback.classic.Logger;
+import org.glassfish.jersey.client.ClientConfig;
+import org.slf4j.LoggerFactory;
 
 public class ClientMock {
 
@@ -53,7 +51,7 @@ public class ClientMock {
         try {
             nickName = in.readLine();
         } catch (IOException e) {
-            e.printStackTrace();
+            System.out.println(e.getMessage());
         }
 
         startNotificationListenerInNewThread();
@@ -118,10 +116,10 @@ public class ClientMock {
                     System.out.println("Your reservation with id: " + reservationResponseDTO1.getId() + " has been canceled");
                 }
             } catch (IOException e) {
-                e.printStackTrace();
+                System.out.println(e.getMessage());
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            System.out.println(e.getMessage());
         }
     }
 
@@ -163,9 +161,9 @@ public class ClientMock {
     }
 
     private static void showMenu() {
-        System.out.println("1. List all rooms");
+        System.out.println("1. List all available rooms");
         System.out.println("2. Make reservation for given room number and date");
-        System.out.println("3. Cancel one of your reservations");
+        System.out.println("3. List all your reservations or cancel one of your reservations");
         System.out.println("4. Exit");
     }
 
@@ -182,7 +180,7 @@ public class ClientMock {
                 return;
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            System.out.println(e.getMessage());
         }
 
         try {
@@ -201,7 +199,7 @@ public class ClientMock {
                 System.out.println("Sorry problem with server. Response from server: " + response.toString());
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            System.out.println(e.getMessage());
         }
     }
 
@@ -211,8 +209,7 @@ public class ClientMock {
             simpleDateFormat.parse(arrivalDate);
             simpleDateFormat.parse(leaveDate);
         } catch (ParseException e) {
-            System.out.println("sorry error while parsing data");
-            e.printStackTrace();
+            System.out.println(e.getMessage());
             return false;
         }
         return true;
@@ -254,7 +251,7 @@ public class ClientMock {
                 System.out.println("Did not create reservation. Response status: " + response.getStatus());
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            System.out.println(e.getMessage());
         }
     }
 }

@@ -6,15 +6,14 @@ import java.util.Map;
 
 import javax.inject.Inject;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.holiday.house.api.dto.ReservationDTO;
 import com.holiday.house.api.dto.ReservationResponseDTO;
 import com.holiday.house.api.dto.ReservationResponseDTO.ReservationResponseDTOBuilder;
 import com.holiday.house.api.dto.RoomDTO;
 import com.holiday.house.api.dto.RoomResponseDTO;
 import com.house.holiday.client.boundary.HolidayHouseClient;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ReservationManager {
 
@@ -25,25 +24,23 @@ public class ReservationManager {
 
     public ReservationResponseDTO makeReservation(ReservationDTO reservationDto) {
         ReservationResponseDTOBuilder reservationResponseDTOBuilder = ReservationResponseDTO.builder();
-        if (!doesRoomWithGivenNumberExist(reservationDto.getRoomNumber())) {
-            logger.error("The room with number: {} does not exists", reservationDto.getRoomNumber());
-            return reservationResponseDTOBuilder
-                    .withMessage(String.format("The room with number: [%s] does not exists", reservationDto.getRoomNumber()))
-                    .build();
+
+        Integer reservationRoomNumber = reservationDto.getRoomNumber();
+        if (!doesRoomWithGivenNumberExist(reservationRoomNumber)) {
+            logger.error("The room with number: {} does not exists", reservationRoomNumber);
+            return buildRoomDoesntExistResponse(reservationResponseDTOBuilder, reservationRoomNumber);
         }
 
+        LocalDate reservationFromDate = reservationDto.getFromDate();
+        LocalDate reservationToDate = reservationDto.getToDate();
         if (isArrivalDateAfterLeaveDate(reservationDto)) {
-            logger.error("Leave date [{}] must be after arrival date [{}]!", reservationDto.getFromDate(), reservationDto.getToDate());
-            return reservationResponseDTOBuilder
-                    .withMessage(String.format("Leave date [%s] must be after arrival date [%s]!", reservationDto.getFromDate(), reservationDto.getToDate()))
-                    .build();
+            logger.error("Leave date [{}] must be after arrival date [{}]!", reservationFromDate, reservationToDate);
+            return buildArrivalDateAfterLeaveDataResponse(reservationResponseDTOBuilder, reservationFromDate, reservationToDate);
         }
 
         if (isThereAnyCollisionWithGivenDate(reservationDto)) {
-            logger.error("Room with number {} is busy from {} to {}. For reservation {}", reservationDto.getRoomNumber(), reservationDto.getFromDate(), reservationDto.getToDate(), reservationDto);
-            return reservationResponseDTOBuilder
-                    .withMessage(String.format("Room with number: %s is busy from %s to %s", reservationDto.getRoomNumber(), reservationDto.getFromDate(), reservationDto.getToDate()))
-                    .build();
+            logger.error("Room with number {} is busy from {} to {}. For reservation {}", reservationRoomNumber, reservationFromDate, reservationToDate, reservationDto);
+            return buildReservationCollisionResponse(reservationResponseDTOBuilder, reservationRoomNumber, reservationFromDate, reservationToDate);
         }
 
         return holidayHouseClient.makeReservation(reservationDto);
@@ -59,6 +56,22 @@ public class ReservationManager {
         return holidayHouseClient.cancelReservationById(reservationId);
     }
 
+    private ReservationResponseDTO buildReservationCollisionResponse(ReservationResponseDTOBuilder reservationResponseDTOBuilder, Integer reservationRoomNumber, LocalDate reservationFromDate, LocalDate reservationToDate) {
+        return buildReservationResponse(reservationResponseDTOBuilder, String.format("Room with number: %s is busy from %s to %s", reservationRoomNumber, reservationFromDate, reservationToDate));
+    }
+
+    private ReservationResponseDTO buildArrivalDateAfterLeaveDataResponse(ReservationResponseDTOBuilder reservationResponseDTOBuilder, LocalDate reservationFromDate, LocalDate reservationToDate) {
+        return buildReservationResponse(reservationResponseDTOBuilder, String.format("Leave date [%s] must be after arrival date [%s]!", reservationFromDate, reservationToDate));
+    }
+
+    private ReservationResponseDTO buildRoomDoesntExistResponse(ReservationResponseDTOBuilder reservationResponseDTOBuilder, Integer reservationRoomNumber) {
+        return buildReservationResponse(reservationResponseDTOBuilder, String.format("The room with number: [%s] does not exists", reservationRoomNumber));
+    }
+
+    private ReservationResponseDTO buildReservationResponse(ReservationResponseDTOBuilder builder, String message) {
+        return builder.withMessage(message).build();
+    }
+
     private boolean isThereAnyCollisionWithGivenDate(ReservationDTO reservationDto) {
         ReservationResponseDTO allReservations = holidayHouseClient.getAllReservations();
         Map<String, ReservationDTO> reservationDTOs = allReservations.getReservationDTOs();
@@ -67,6 +80,10 @@ public class ReservationManager {
             return false;
         }
 
+        return isThereAnyReservationCollision(reservationDto, reservationDTOs);
+    }
+
+    private boolean isThereAnyReservationCollision(ReservationDTO reservationDto, Map<String, ReservationDTO> reservationDTOs) {
         return reservationDTOs
                 .values()
                 .stream()
