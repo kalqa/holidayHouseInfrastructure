@@ -6,14 +6,15 @@ import java.util.Map;
 
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.holiday.house.api.dto.ReservationDTO;
 import com.holiday.house.api.dto.ReservationResponseDTO;
 import com.holiday.house.api.dto.ReservationResponseDTO.ReservationResponseDTOBuilder;
 import com.holiday.house.api.dto.RoomDTO;
 import com.holiday.house.api.dto.RoomResponseDTO;
 import com.house.holiday.client.boundary.HolidayHouseClient;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class ReservationManager {
 
@@ -31,7 +32,7 @@ public class ReservationManager {
                     .build();
         }
 
-        if (reservationDto.getFromDate().isAfter(reservationDto.getToDate())) {
+        if (isArrivalDateAfterLeaveDate(reservationDto)) {
             logger.error("Leave date [{}] must be after arrival date [{}]!", reservationDto.getFromDate(), reservationDto.getToDate());
             return reservationResponseDTOBuilder
                     .withMessage(String.format("Leave date [%s] must be after arrival date [%s]!", reservationDto.getFromDate(), reservationDto.getToDate()))
@@ -39,7 +40,7 @@ public class ReservationManager {
         }
 
         if (isThereAnyCollisionWithGivenDate(reservationDto)) {
-            logger.error("Leave date [{}] must be after arrival date [{}]!", reservationDto.getFromDate(), reservationDto.getToDate());
+            logger.error("Room with number {} is busy from {} to {}. For reservation {}", reservationDto.getRoomNumber(), reservationDto.getFromDate(), reservationDto.getToDate(), reservationDto);
             return reservationResponseDTOBuilder
                     .withMessage(String.format("Room with number: %s is busy from %s to %s", reservationDto.getRoomNumber(), reservationDto.getFromDate(), reservationDto.getToDate()))
                     .build();
@@ -81,9 +82,11 @@ public class ReservationManager {
             return false;
         }
 
-        return availableRooms
-                .stream()
-                .anyMatch(roomDTO -> roomNumber.equals(roomDTO.getRoomNumber()));
+        return availableRooms.stream().anyMatch(roomDTO -> roomNumber.equals(roomDTO.getRoomNumber()));
+    }
+
+    private boolean isArrivalDateAfterLeaveDate(ReservationDTO reservationDto) {
+        return reservationDto.getFromDate().isAfter(reservationDto.getToDate());
     }
 
     private boolean isRoomNumberEqualToClientRoomNumber(ReservationDTO reservationDto, ReservationDTO reservation) {

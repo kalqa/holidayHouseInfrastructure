@@ -19,16 +19,18 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
-import ch.qos.logback.classic.Level;
-import ch.qos.logback.classic.Logger;
+import org.glassfish.jersey.client.ClientConfig;
+import org.slf4j.LoggerFactory;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider;
 import com.holiday.house.api.dto.ReservationDTO;
 import com.holiday.house.api.dto.ReservationResponseDTO;
 import com.holiday.house.api.dto.RoomResponseDTO;
-import org.glassfish.jersey.client.ClientConfig;
-import org.slf4j.LoggerFactory;
+
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.Logger;
 
 public class ClientMock {
 
@@ -93,7 +95,8 @@ public class ClientMock {
             int i = 0;
             for (Map.Entry entry : reservationDTOs.entrySet()) {
                 ids.add(entry.getKey().toString());
-                System.out.println("Reservation " + (i + 1) + ":" + entry.getKey() + ", " + ((ReservationDTO) entry.getValue()).getRoomNumber());
+                ReservationDTO reservationDTO = (ReservationDTO) entry.getValue();
+                System.out.println("Reservation " + (i + 1) + ":" + entry.getKey() + ", Room: " + reservationDTO.getRoomNumber() + " from: " + reservationDTO.getFromDate().toString() + " to: " + reservationDTO.getToDate().toString());
                 i++;
             }
 

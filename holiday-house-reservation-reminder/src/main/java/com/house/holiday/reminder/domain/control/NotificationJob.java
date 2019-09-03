@@ -5,13 +5,14 @@ import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import com.holiday.house.api.dto.ReservationDTO;
-import com.house.holiday.reminder.client.boundary.ReservationClient;
-import com.house.holiday.reminder.domain.entity.ReservationNotification;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+
+import com.holiday.house.api.dto.ReservationDTO;
+import com.house.holiday.reminder.client.boundary.ReservationClient;
+import com.house.holiday.reminder.domain.entity.ReservationNotification;
 
 @Service
 public class NotificationJob {
@@ -27,8 +28,8 @@ public class NotificationJob {
         this.reservationClient = reservationClient;
     }
 
-    @Scheduled(fixedRate = 3600000)
-//    @Scheduled(fixedRate = 10000)
+    //    @Scheduled(fixedRate = 3600000)
+    @Scheduled(fixedRate = 1000)
     public void doSomething() {
         Collection<ReservationDTO> allReservationsFromFireBase = reservationClient.getAllReservations();
 

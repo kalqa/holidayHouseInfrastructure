@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 @Controller
-public class SSEController {
+public class SseController {
 
     private final CopyOnWriteArrayList<HolidayHouseClientEmitter> houseClientEmitters = new CopyOnWriteArrayList<>();
 
@@ -35,12 +35,6 @@ public class SSEController {
     @EventListener
     public void onNotificationSend(ReservationNotification reservationNotification) {
         List<HolidayHouseClientEmitter> deadEmitters = new ArrayList<>();
-
-//        SseEmitter.event()
-//                .data(reservationNotification)
-//                .name("mozna rozroznic ;)")
-//                .id(String.valueOf(reservationNotification.hashCode()))
-//                .build()
 
         this.houseClientEmitters.forEach(clientEmitter -> {
             try {
